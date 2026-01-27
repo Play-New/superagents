@@ -25,6 +25,10 @@ export interface GenerationContext {
   // Sampled files for context
   sampledFiles: SampledFile[];
 
+  // CLI options
+  verbose?: boolean;  // Show detailed output
+  dryRun?: boolean;   // Preview without API calls
+
   // Metadata
   generatedAt: string;
 }

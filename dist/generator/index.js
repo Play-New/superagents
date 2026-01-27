@@ -1,9 +1,17 @@
 /**
  * AI Generator - generates agents, skills, and CLAUDE.md using Claude AI
+ *
+ * Features:
+ * - Parallel generation with concurrency limit
+ * - Tiered model selection for cost optimization
+ * - Verbose logging support
  */
 import Anthropic from '@anthropic-ai/sdk';
 import { executeWithClaudeCLI } from '../utils/claude-cli.js';
 import ora from 'ora';
+import { parallelGenerateWithErrors } from '../utils/concurrency.js';
+import { selectModel, getSkillComplexity, getModelDisplayName } from '../utils/model-selector.js';
+import { log } from '../utils/logger.js';
 export class AIGenerator {
     constructor() {
         // No need to store API key - we get it from context
@@ -16,63 +24,81 @@ export class AIGenerator {
             text: `Generating... 0%`,
             spinner: 'dots'
         }).start();
-        const updateSpinner = (item) => {
-            spinner.text = `[${getPercent()}%] Generating ${item}...`;
-        };
-        const successItem = (item) => {
-            completed++;
-            spinner.text = `[${getPercent()}%] ✓ ${item}`;
-        };
-        const failItem = (item, error) => {
-            completed++;
-            spinner.warn(`[${getPercent()}%] ⚠ ${item} - ${error}`);
-            spinner.start();
-        };
-        // Generate agents using AI
-        const agents = [];
-        for (const agentName of context.selectedAgents) {
-            updateSpinner(`agent: ${agentName}`);
-            try {
-                const content = await this.generateAgent(agentName, context);
-                agents.push({
-                    filename: `${agentName}.md`,
-                    content,
-                    agentName
-                });
-                successItem(`Agent ${agentName}`);
+        const updateProgress = (type, name, status, error) => {
+            if (status === 'start') {
+                spinner.text = `[${getPercent()}%] Generating ${type}: ${name}...`;
             }
-            catch (error) {
-                failItem(`Agent ${agentName}`, error instanceof Error ? error.message : 'Unknown error');
-                // Fallback to placeholder if AI generation fails
-                agents.push({
-                    filename: `${agentName}.md`,
-                    content: this.generatePlaceholderAgent(agentName, context),
-                    agentName
-                });
+            else if (status === 'success') {
+                completed++;
+                spinner.text = `[${getPercent()}%] ✓ ${type}: ${name}`;
+                log.verbose(`Generated ${type}: ${name}`);
             }
+            else {
+                completed++;
+                spinner.warn(`[${getPercent()}%] ⚠ ${type}: ${name} - ${error}`);
+                spinner.start();
+                log.verbose(`Failed ${type}: ${name} - ${error}`);
+            }
+        };
+        log.section('Starting Generation');
+        log.verbose(`Total items to generate: ${totalItems}`);
+        log.verbose(`Agents: ${context.selectedAgents.join(', ')}`);
+        log.verbose(`Skills: ${context.selectedSkills.join(', ')}`);
+        // Generate agents in parallel
+        log.debug('Generating agents in parallel...');
+        const agentResults = await parallelGenerateWithErrors(context.selectedAgents, async (agentName) => {
+            updateProgress('agent', agentName, 'start');
+            const model = selectModel({
+                userSelectedModel: context.selectedModel,
+                generationType: 'agent'
+            });
+            log.verbose(`Agent ${agentName} using model: ${getModelDisplayName(model)}`);
+            const content = await this.generateAgent(agentName, context, model);
+            return {
+                filename: `${agentName}.md`,
+                content,
+                agentName
+            };
+        }, (agentName, _result) => updateProgress('agent', agentName, 'success'), (agentName, error) => {
+            updateProgress('agent', agentName, 'error', error.message);
+        });
+        // Add successful agents and fallbacks for failed ones
+        const agents = [...agentResults.results];
+        for (const { item: agentName } of agentResults.errors) {
+            agents.push({
+                filename: `${agentName}.md`,
+                content: this.generatePlaceholderAgent(agentName, context),
+                agentName
+            });
         }
-        // Generate skills using AI
-        const skills = [];
-        for (const skillName of context.selectedSkills) {
-            updateSpinner(`skill: ${skillName}`);
-            try {
-                const content = await this.generateSkill(skillName, context);
-                skills.push({
-                    filename: `${skillName}.md`,
-                    content,
-                    skillName
-                });
-                successItem(`Skill ${skillName}`);
-            }
-            catch (error) {
-                failItem(`Skill ${skillName}`, error instanceof Error ? error.message : 'Unknown error');
-                // Fallback to placeholder if AI generation fails
-                skills.push({
-                    filename: `${skillName}.md`,
-                    content: this.generatePlaceholderSkill(skillName, context),
-                    skillName
-                });
-            }
+        // Generate skills in parallel
+        log.debug('Generating skills in parallel...');
+        const skillResults = await parallelGenerateWithErrors(context.selectedSkills, async (skillName) => {
+            updateProgress('skill', skillName, 'start');
+            const complexity = getSkillComplexity(skillName);
+            const model = selectModel({
+                userSelectedModel: context.selectedModel,
+                generationType: 'skill',
+                complexity
+            });
+            log.verbose(`Skill ${skillName} (${complexity}) using model: ${getModelDisplayName(model)}`);
+            const content = await this.generateSkill(skillName, context, model);
+            return {
+                filename: `${skillName}.md`,
+                content,
+                skillName
+            };
+        }, (skillName, _result) => updateProgress('skill', skillName, 'success'), (skillName, error) => {
+            updateProgress('skill', skillName, 'error', error.message);
+        });
+        // Add successful skills and fallbacks for failed ones
+        const skills = [...skillResults.results];
+        for (const { item: skillName } of skillResults.errors) {
+            skills.push({
+                filename: `${skillName}.md`,
+                content: this.generatePlaceholderSkill(skillName, context),
+                skillName
+            });
         }
         const hooks = [{
                 filename: 'skill-loader.sh',
@@ -80,17 +106,26 @@ export class AIGenerator {
                 hookName: 'skill-loader'
             }];
         // Generate CLAUDE.md using AI
-        updateSpinner('CLAUDE.md');
+        updateProgress('file', 'CLAUDE.md', 'start');
         let claudeMd;
         try {
-            claudeMd = await this.generateClaudeMdWithAI(context);
-            successItem('CLAUDE.md');
+            const claudeModel = selectModel({
+                userSelectedModel: context.selectedModel,
+                generationType: 'claude-md'
+            });
+            log.verbose(`CLAUDE.md using model: ${getModelDisplayName(claudeModel)}`);
+            claudeMd = await this.generateClaudeMdWithAI(context, claudeModel);
+            updateProgress('file', 'CLAUDE.md', 'success');
         }
         catch (error) {
-            failItem('CLAUDE.md', error instanceof Error ? error.message : 'Unknown error');
+            updateProgress('file', 'CLAUDE.md', 'error', error instanceof Error ? error.message : 'Unknown error');
             claudeMd = this.generateClaudeMd(context);
         }
         spinner.succeed(`Generation complete! [100%]`);
+        // Summary logging
+        log.section('Generation Summary');
+        log.verbose(`Agents generated: ${agents.length} (${agentResults.errors.length} fallbacks)`);
+        log.verbose(`Skills generated: ${skills.length} (${skillResults.errors.length} fallbacks)`);
         const settings = {
             agents: context.selectedAgents,
             skills: context.selectedSkills,
@@ -108,9 +143,9 @@ export class AIGenerator {
     /**
      * Generate an agent using Claude AI
      */
-    async generateAgent(agentName, context) {
+    async generateAgent(agentName, context, model) {
         const prompt = this.buildAgentPrompt(agentName, context);
-        const response = await this.executePrompt(prompt, context);
+        const response = await this.executePrompt(prompt, context, model);
         // Extract agent content if it's wrapped in markdown code blocks
         const cleaned = response.replace(/```markdown\n?/g, '').replace(/```\n?$/g, '').trim();
         return cleaned;
@@ -118,9 +153,9 @@ export class AIGenerator {
     /**
      * Generate a skill using Claude AI
      */
-    async generateSkill(skillName, context) {
+    async generateSkill(skillName, context, model) {
         const prompt = this.buildSkillPrompt(skillName, context);
-        const response = await this.executePrompt(prompt, context);
+        const response = await this.executePrompt(prompt, context, model);
         // Extract skill content if it's wrapped in markdown code blocks
         const cleaned = response.replace(/```markdown\n?/g, '').replace(/```\n?$/g, '').trim();
         return cleaned;
@@ -128,9 +163,9 @@ export class AIGenerator {
     /**
      * Generate CLAUDE.md using Claude AI
      */
-    async generateClaudeMdWithAI(context) {
+    async generateClaudeMdWithAI(context, model) {
         const prompt = this.buildClaudeMdPrompt(context);
-        const response = await this.executePrompt(prompt, context);
+        const response = await this.executePrompt(prompt, context, model);
         // Extract content if it's wrapped in markdown code blocks
         const cleaned = response.replace(/```markdown\n?/g, '').replace(/```\n?$/g, '').trim();
         return cleaned;
@@ -609,8 +644,9 @@ Generated by SuperAgents - Context-aware configuration for Claude Code
     /**
      * Execute a prompt using the appropriate auth method
      */
-    async executePrompt(prompt, context) {
+    async executePrompt(prompt, context, model) {
         if (context.authMethod === 'claude-plan') {
+            // For Claude CLI, we pass the user's selected model preference
             return await executeWithClaudeCLI(prompt, context.selectedModel);
         }
         else {
@@ -618,11 +654,9 @@ Generated by SuperAgents - Context-aware configuration for Claude Code
                 throw new Error('API key is required for api-key auth method');
             }
             const anthropic = new Anthropic({ apiKey: context.apiKey });
-            const modelId = context.selectedModel === 'opus'
-                ? 'claude-opus-4-5-20251101'
-                : 'claude-sonnet-4-5-20250929';
+            log.debug(`Calling API with model: ${model}`);
             const response = await anthropic.messages.create({
-                model: modelId,
+                model,
                 max_tokens: 8000, // Increased for more detailed responses
                 messages: [{ role: 'user', content: prompt }]
             });

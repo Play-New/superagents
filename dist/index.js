@@ -3,6 +3,10 @@
  * SuperAgents - Context-Aware Claude Code Configuration Generator
  *
  * Main entry point for the CLI application
+ *
+ * Features:
+ * - --dry-run: Preview what would be generated without API calls
+ * - --verbose: Show detailed logging
  */
 import { Command } from 'commander';
 import * as p from '@clack/prompts';
@@ -13,7 +17,9 @@ import os from 'os';
 import path from 'path';
 import { displayBanner, displayError, displaySuccess } from './cli/banner.js';
 import { collectProjectGoal, selectModel, confirmSelections } from './cli/prompts.js';
+import { displayDryRunPreview } from './cli/dry-run.js';
 import { authenticateWithAnthropic } from './utils/auth.js';
+import { setVerbose, log } from './utils/logger.js';
 import { CodebaseAnalyzer } from './analyzer/codebase-analyzer.js';
 import { RecommendationEngine } from './context/recommendation-engine.js';
 import { AIGenerator } from './generator/index.js';
@@ -23,11 +29,24 @@ const program = new Command();
 program
     .name('superagents')
     .description('Context-aware Claude Code configuration generator')
-    .version('1.0.0')
-    .action(async () => {
+    .version('1.1.0')
+    .option('--dry-run', 'Preview what would be generated without making API calls')
+    .option('-v, --verbose', 'Show detailed output')
+    .action(async (options) => {
     try {
+        // Set verbose mode
+        const isVerbose = options.verbose || false;
+        const isDryRun = options.dryRun || false;
+        setVerbose(isVerbose);
+        log.debug('SuperAgents starting...');
+        log.debug(`Working directory: ${process.cwd()}`);
+        log.debug(`Dry-run mode: ${isDryRun}`);
+        log.debug(`Verbose mode: ${isVerbose}`);
         // Display banner
         displayBanner();
+        if (isDryRun) {
+            console.log(pc.yellow('\n  Running in DRY-RUN mode - no API calls will be made\n'));
+        }
         // Step 1: Collect project goal
         const goalData = await collectProjectGoal();
         const goal = {
@@ -38,28 +57,45 @@ program
             timestamp: new Date().toISOString(),
             confidence: 1.0
         };
-        // Step 2: Authenticate with Anthropic
-        p.note('', pc.bold('\n🔐 Authentication'));
-        const auth = await authenticateWithAnthropic();
+        log.debug(`Goal: ${goal.description}`);
+        log.debug(`Category: ${goal.category}`);
+        // Step 2: Authenticate with Anthropic (skip in dry-run)
+        let auth = { method: 'api-key', apiKey: undefined };
+        if (!isDryRun) {
+            p.note('', pc.bold('\n🔐 Authentication'));
+            auth = await authenticateWithAnthropic();
+            log.debug(`Auth method: ${auth.method}`);
+        }
         // Step 3: Select AI model
         const model = await selectModel();
+        log.debug(`Selected model: ${model}`);
         // Step 4: Analyze codebase
         const spinner = p.spinner();
         spinner.start('Analyzing your codebase...');
         const analyzer = new CodebaseAnalyzer(process.cwd());
         const codebaseAnalysis = await analyzer.analyze();
         spinner.stop(pc.green('✓') + ' Codebase analyzed');
+        log.section('Codebase Analysis');
+        log.table({
+            'Project Type': codebaseAnalysis.projectType,
+            'Language': codebaseAnalysis.language || 'Unknown',
+            'Framework': codebaseAnalysis.framework || 'None',
+            'Total Files': codebaseAnalysis.totalFiles,
+            'Dependencies': codebaseAnalysis.dependencies.length
+        });
         // Step 5: Generate recommendations
         spinner.start('Generating recommendations...');
         const recommendationEngine = new RecommendationEngine();
         const recommendations = await recommendationEngine.recommend(goal, codebaseAnalysis);
         spinner.stop(pc.green('✓') + ' Recommendations generated');
+        log.section('Recommendations');
+        log.verbose(`Agents: ${recommendations.agents.map(a => `${a.name}(${a.score})`).join(', ')}`);
+        log.verbose(`Skills: ${recommendations.skills.map(s => `${s.name}(${s.score})`).join(', ')}`);
         // Step 6: Confirm selections
         const selections = await confirmSelections(recommendations);
-        // Step 7: Generate with AI
-        // Generator has its own ora spinner with percentage progress
-        console.log(''); // Add spacing
-        const generator = new AIGenerator();
+        log.debug(`Selected agents: ${selections.agents.join(', ')}`);
+        log.debug(`Selected skills: ${selections.skills.join(', ')}`);
+        // Build context
         const context = {
             goal,
             codebase: codebaseAnalysis,
@@ -69,8 +105,19 @@ program
             authMethod: auth.method,
             apiKey: auth.apiKey,
             sampledFiles: codebaseAnalysis.sampledFiles || [],
+            verbose: isVerbose,
+            dryRun: isDryRun,
             generatedAt: new Date().toISOString()
         };
+        // If dry-run, show preview and exit
+        if (isDryRun) {
+            displayDryRunPreview(context, recommendations);
+            return;
+        }
+        // Step 7: Generate with AI
+        // Generator has its own ora spinner with percentage progress
+        console.log(''); // Add spacing
+        const generator = new AIGenerator();
         const outputs = await generator.generateAll(context);
         console.log(''); // Add spacing after generation
         // Step 8: Write output
@@ -87,6 +134,7 @@ program
     }
     catch (error) {
         if (error instanceof Error) {
+            log.debug(`Error: ${error.stack}`);
             displayError(error.message);
         }
         else {

@@ -13,6 +13,8 @@ export interface GenerationContext {
     authMethod: AuthMethod;
     apiKey?: string;
     sampledFiles: SampledFile[];
+    verbose?: boolean;
+    dryRun?: boolean;
     generatedAt: string;
 }
 export interface AgentOutput {

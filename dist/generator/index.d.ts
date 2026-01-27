@@ -1,5 +1,10 @@
 /**
  * AI Generator - generates agents, skills, and CLAUDE.md using Claude AI
+ *
+ * Features:
+ * - Parallel generation with concurrency limit
+ * - Tiered model selection for cost optimization
+ * - Verbose logging support
  */
 import type { GenerationContext, GeneratedOutputs } from '../types/generation.js';
 export declare class AIGenerator {
