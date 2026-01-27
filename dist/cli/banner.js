@@ -19,13 +19,13 @@ export const BANNER = `
 ║  ██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   ███████║         ║
 ║  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝         ║
 ║                                                               ║
-║  Context-Aware Claude Code Configuration Generator              ║
+║  Context-Aware Claude Code Configuration Generator            ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
 `;
 export function displayBanner() {
     console.log(pc.cyan(BANNER));
-    console.log(pc.dim("  Version 1.0.0 - Play New\n"));
+    console.log(pc.dim("  Version 1.1.0\n"));
 }
 export function displaySuccess(summary) {
     console.log("\n" +
