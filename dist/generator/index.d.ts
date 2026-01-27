@@ -8,18 +8,19 @@
  */
 import type { GenerationContext, GeneratedOutputs } from '../types/generation.js';
 export declare class AIGenerator {
+    private codebaseHash;
     constructor();
     generateAll(context: GenerationContext): Promise<GeneratedOutputs>;
     /**
-     * Generate an agent using Claude AI
+     * Generate an agent using Claude AI (with caching)
      */
     private generateAgent;
     /**
-     * Generate a skill using Claude AI
+     * Generate a skill using Claude AI (with caching)
      */
     private generateSkill;
     /**
-     * Generate CLAUDE.md using Claude AI
+     * Generate CLAUDE.md using Claude AI (with caching)
      */
     private generateClaudeMdWithAI;
     /**
@@ -42,5 +43,10 @@ export declare class AIGenerator {
      * Execute a prompt using the appropriate auth method
      */
     private executePrompt;
+    /**
+     * Execute a prompt with streaming for real-time output
+     * Shows content as it's being generated (verbose mode only)
+     */
+    private executeWithStreaming;
 }
 //# sourceMappingURL=index.d.ts.map

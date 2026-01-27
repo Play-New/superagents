@@ -227,7 +227,7 @@ interface GenerationContext {
 
 - @Architecture.md - Complete technical architecture
 - @README.md - User-facing documentation
-- @PROJECT_SUMMARY.md - Project overview and status
+- @NEW_IMPLEMENTATION.md - Implementation roadmap and progress tracking
 
 ## Skill Usage Guide
 
