@@ -41,8 +41,16 @@ export async function executeWithClaudeCLI(
 
   try {
     // Use stdin for prompt (handles long prompts better than args)
+    // Add flags to avoid picking up local context:
+    // --no-session-persistence: don't save/resume sessions
+    // --setting-sources user: only use user settings, not project/.claude
     const result = await executeCommand(
-      ['--print', '--model', modelArg],
+      [
+        '--print',
+        '--model', modelArg,
+        '--no-session-persistence',
+        '--setting-sources', 'user'
+      ],
       prompt,
       CLI_TIMEOUT_MS
     );
