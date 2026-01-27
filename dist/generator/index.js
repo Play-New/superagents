@@ -10,8 +10,9 @@ export class AIGenerator {
     async generateAll(context) {
         const totalItems = context.selectedAgents.length + context.selectedSkills.length + 1;
         let completed = 0;
-        const log = (msg) => {
-            process.stdout.write(`\r\x1b[K  ${msg}`);
+        const log = (msg, done = false) => {
+            const prefix = done ? '  ✓' : '  ⏳';
+            console.log(`${prefix} ${msg}`);
         };
         // Generate agents using AI
         const agents = [];
@@ -24,8 +25,10 @@ export class AIGenerator {
                     content,
                     agentName
                 });
+                log(`Agent ${agentName} done`, true);
             }
             catch (error) {
+                console.error(`  ⚠️  Agent ${agentName} failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
                 // Fallback to placeholder if AI generation fails
                 agents.push({
                     filename: `${agentName}.md`,
@@ -45,8 +48,10 @@ export class AIGenerator {
                     content,
                     skillName
                 });
+                log(`Skill ${skillName} done`, true);
             }
             catch (error) {
+                console.error(`  ⚠️  Skill ${skillName} failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
                 // Fallback to placeholder if AI generation fails
                 skills.push({
                     filename: `${skillName}.md`,
@@ -65,12 +70,12 @@ export class AIGenerator {
         let claudeMd;
         try {
             claudeMd = await this.generateClaudeMdWithAI(context);
+            log('CLAUDE.md done', true);
         }
         catch (error) {
+            console.error(`  ⚠️  CLAUDE.md failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
             claudeMd = this.generateClaudeMd(context);
         }
-        // Clear progress line
-        process.stdout.write('\r\x1b[K');
         const settings = {
             agents: context.selectedAgents,
             skills: context.selectedSkills,

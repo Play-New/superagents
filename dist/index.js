@@ -57,7 +57,8 @@ program
         // Step 6: Confirm selections
         const selections = await confirmSelections(recommendations);
         // Step 7: Generate with AI
-        spinner.start('Generating configurations with Claude...');
+        // Don't use spinner here - generator has its own progress display
+        console.log(pc.dim('\n  Generating configurations with Claude...\n'));
         const generator = new AIGenerator();
         const context = {
             goal,
@@ -71,7 +72,7 @@ program
             generatedAt: new Date().toISOString()
         };
         const outputs = await generator.generateAll(context);
-        spinner.stop(pc.green('✓') + ' Configurations generated');
+        console.log('\n' + pc.green('  ✓') + ' Configurations generated\n');
         // Step 8: Write output
         spinner.start('Writing files to .claude folder...');
         const writer = new OutputWriter(process.cwd());
