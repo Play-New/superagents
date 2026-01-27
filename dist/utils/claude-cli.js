@@ -41,7 +41,8 @@ export async function executeWithClaudeCLI(prompt, model = 'sonnet') {
             '--print',
             '--model', modelArg,
             '--no-session-persistence',
-            '--setting-sources', 'user'
+            '--setting-sources', 'user',
+            '--tools', '' // Disable all tools - just return text
         ], prompt, CLI_TIMEOUT_MS);
         return result.trim();
     }
