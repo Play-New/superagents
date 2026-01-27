@@ -12,7 +12,9 @@ SuperAgents is an intelligent CLI tool that generates highly customized Claude C
 - 📚 **100+ Skill Library** - Only relevant skills installed
 - 🎨 **Beautiful CLI** - Interactive prompts with progress indicators
 - 🔒 **Privacy-First** - Local processing, smart file sampling
-- ⚡ **Fast & Efficient** - Optimized analysis and generation
+- ⚡ **Fast & Efficient** - Parallel generation, smart caching, tiered models
+- 💾 **Smart Caching** - Caches analysis and responses for faster subsequent runs
+- 🔄 **Streaming Output** - Real-time generation feedback in verbose mode
 
 ## 🚀 Installation
 
@@ -46,6 +48,39 @@ superagents
 ```
 
 That's it! SuperAgents will guide you through the setup.
+
+### CLI Options
+
+```bash
+superagents [options]
+
+Options:
+  --dry-run     Preview what would be generated without making API calls
+  -v, --verbose Show detailed output with streaming responses
+  --version     Show version number
+  --help        Show help
+
+Commands:
+  superagents cache --stats   Show cache statistics
+  superagents cache --clear   Clear all cached data
+  superagents update          Update SuperAgents to latest version
+```
+
+### Examples
+
+```bash
+# Standard run
+superagents
+
+# Preview without API calls (see cost estimate)
+superagents --dry-run
+
+# Verbose mode with streaming output
+superagents --verbose
+
+# Check cache status
+superagents cache --stats
+```
 
 ## 🔐 Authentication
 
@@ -187,6 +222,21 @@ npm run type-check
 # Lint
 npm run lint
 ```
+
+## ⚡ Performance & Cost Optimization
+
+SuperAgents is optimized for speed and cost efficiency:
+
+| Feature | Benefit |
+|---------|---------|
+| **Parallel Generation** | 3x faster with concurrent API calls |
+| **Tiered Models** | Uses Haiku for simple tasks, Sonnet for complex |
+| **Codebase Caching** | Skip re-analysis on unchanged projects (24h cache) |
+| **Response Caching** | Reuse generated content for same goal/codebase (7-day cache) |
+| **Streaming** | Real-time feedback in verbose mode |
+| **Dry-Run Mode** | Preview & estimate costs before generation |
+
+Cache location: `~/.superagents/cache/`
 
 ## 🔒 Privacy & Security
 
