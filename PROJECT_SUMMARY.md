@@ -300,7 +300,7 @@ npm run build
 ### Key Advantages
 
 - ✅ **Free and open source**
-- ✅ **Goal-aware** - asks "What are you building?"
+- ✅ **Context-aware** - asks "What are you building?"
 - ✅ **Beautiful UX** - interactive CLI with progress indicators
 - ✅ **Transparent** - see exactly what it generates
 
@@ -336,7 +336,7 @@ npm run build
 
 **SuperAgents isn't just a config generator.**
 
-It's a **goal-aware assistant** that:
+It's a **context-aware assistant** that:
 
 1. Understands what you're trying to build
 2. Analyzes what you already have

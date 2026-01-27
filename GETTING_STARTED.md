@@ -1,374 +1,252 @@
-# Getting Started with SuperAgents Development
+# Getting Started with SuperAgents
 
-## 🎉 What's Been Created
+## Overview
 
-Your **SuperAgents** project is now initialized with a comprehensive foundation! Here's what you have:
+**SuperAgents** is a fully implemented CLI tool that generates context-aware Claude Code configurations. It analyzes your codebase, understands your project goals, and creates customized agents and skills.
 
-### 📁 Project Structure
+## Installation
 
-```
-pn-superagents/
-├── README.md                      # ✅ Project overview and usage
-├── CLAUDE.md                      # ✅ Development guide for Claude Code
-├── Architecture.md                # ✅ Complete technical architecture
-├── GETTING_STARTED.md            # ✅ This file
-├── package.json                   # ✅ Dependencies and scripts
-├── tsconfig.json                  # ✅ TypeScript configuration
-├── .eslintrc.json                # ✅ ESLint rules
-├── .gitignore                    # ✅ Git ignore patterns
-│
-├── src/
-│   ├── index.ts                  # ✅ Main entry point (basic flow)
-│   │
-│   ├── types/                    # ✅ All TypeScript types defined
-│   │   ├── goal.ts              # Goal-related types
-│   │   ├── codebase.ts          # Codebase analysis types
-│   │   ├── generation.ts        # AI generation types
-│   │   └── config.ts            # Configuration types
-│   │
-│   ├── cli/                      # ✅ CLI interface (complete!)
-│   │   ├── banner.ts            # ASCII art and branding
-│   │   ├── prompts.ts           # Interactive prompts
-│   │   └── progress.ts          # Progress indicators
-│   │
-│   ├── config/                   # ✅ Configuration
-│   │   └── presets.ts           # Goal-based presets (complete!)
-│   │
-│   ├── analyzer/                 # ⏳ TO BE IMPLEMENTED
-│   │   ├── goal-analyzer.ts
-│   │   ├── codebase-analyzer.ts
-│   │   └── detectors/
-│   │
-│   ├── context/                  # ⏳ TO BE IMPLEMENTED
-│   │   ├── builder.ts
-│   │   ├── recommendation-engine.ts
-│   │   └── prompts/
-│   │
-│   ├── generator/                # ⏳ TO BE IMPLEMENTED
-│   │   ├── agents.ts
-│   │   ├── skills.ts
-│   │   ├── hooks.ts
-│   │   └── claude-md.ts
-│   │
-│   ├── writer/                   # ⏳ TO BE IMPLEMENTED
-│   │   └── index.ts
-│   │
-│   └── utils/                    # ⏳ TO BE IMPLEMENTED
-│       ├── logger.ts
-│       ├── fs.ts
-│       └── anthropic.ts
-│
-└── bin/
-    └── superagents               # ✅ Executable entry point
-```
-
-### ✅ What's Complete
-
-1. **Documentation**
-   - ✅ README.md with full usage guide
-   - ✅ CLAUDE.md with development instructions
-   - ✅ Architecture.md with complete technical design
-   - ✅ Getting started guide (this file)
-
-2. **Project Configuration**
-   - ✅ package.json with all dependencies
-   - ✅ TypeScript config (strict mode)
-   - ✅ ESLint config
-   - ✅ Git ignore patterns
-
-3. **Type System**
-   - ✅ Complete TypeScript types for all modules
-   - ✅ Goal types
-   - ✅ Codebase analysis types
-   - ✅ Generation types
-   - ✅ Configuration types
-
-4. **CLI Interface**
-   - ✅ Beautiful ASCII banner
-   - ✅ Interactive prompts with @clack/prompts
-   - ✅ Progress indicators with ora
-   - ✅ Success/error displays
-   - ✅ Goal collection flow
-   - ✅ Model selection
-
-5. **Configuration**
-   - ✅ Goal presets for all project types
-   - ✅ Agent recommendations per goal
-   - ✅ Skill recommendations per goal
-   - ✅ Technical requirements mapping
-
-6. **Entry Point**
-   - ✅ Main CLI orchestration (basic flow)
-   - ✅ Error handling
-   - ✅ User-friendly output
-
-## 🚀 Quick Start
-
-### 1. Install Dependencies
+### Option 1: Quick Install (Recommended)
 
 ```bash
+curl -fsSL https://raw.githubusercontent.com/rinaldofesta/superagents/main/install.sh | bash
+```
+
+This installs SuperAgents to `~/.superagents` and adds it to your PATH.
+
+### Option 2: Clone and Build
+
+```bash
+git clone https://github.com/rinaldofesta/superagents.git
+cd superagents
 npm install
-```
-
-### 2. Test What We Have
-
-```bash
-# Run in development mode
-npm run dev
-```
-
-You should see:
-- Beautiful SuperAgents banner
-- Interactive prompts asking "What are you building?"
-- Model selection
-- Placeholders for steps to be implemented
-
-### 3. Try Type Checking
-
-```bash
-npm run type-check
-```
-
-All types should pass! ✓
-
-## 📋 Next Steps - Implementation Roadmap
-
-### Phase 1: Codebase Analyzer (Priority: HIGH)
-
-**Files to create:**
-- `src/analyzer/codebase-analyzer.ts`
-- `src/analyzer/detectors/framework.ts`
-- `src/analyzer/detectors/language.ts`
-- `src/analyzer/detectors/dependencies.ts`
-- `src/analyzer/detectors/patterns.ts`
-- `src/analyzer/samplers/file-sampler.ts`
-
-**Key Features:**
-- Detect project type (Next.js, React, Python, etc.)
-- Analyze package.json/requirements.txt
-- Scan file structure
-- Identify code patterns (API routes, components, etc.)
-- Smart file sampling (exclude secrets, node_modules)
-
-**Estimated Time:** 4-6 hours
-
-### Phase 2: Goal Analyzer (Priority: HIGH)
-
-**Files to create:**
-- `src/analyzer/goal-analyzer.ts`
-
-**Key Features:**
-- Use Claude API to analyze user's goal description
-- Extract technical requirements
-- Suggest agents and skills based on goal
-- Calculate confidence scores
-
-**Estimated Time:** 2-3 hours
-
-### Phase 3: Recommendation Engine (Priority: HIGH)
-
-**Files to create:**
-- `src/context/recommendation-engine.ts`
-- `src/context/builder.ts`
-
-**Key Features:**
-- Merge goal suggestions + codebase suggestions
-- Score and rank agents
-- Score and rank skills
-- Generate recommendations with reasons
-
-**Estimated Time:** 3-4 hours
-
-### Phase 4: AI Generator (Priority: HIGH)
-
-**Files to create:**
-- `src/generator/index.ts`
-- `src/generator/agents.ts`
-- `src/generator/skills.ts`
-- `src/generator/hooks.ts`
-- `src/generator/claude-md.ts`
-- `src/context/prompts/agent-prompts.ts`
-- `src/context/prompts/skill-prompts.ts`
-- `src/context/prompts/claude-md-prompt.ts`
-- `src/utils/anthropic.ts`
-
-**Key Features:**
-- Generate agents with Claude API
-- Generate skills with project-specific examples
-- Generate hooks (skill-loader.sh)
-- Generate CLAUDE.md with goal context
-- Stream responses with progress
-
-**Estimated Time:** 6-8 hours
-
-### Phase 5: Output Writer (Priority: MEDIUM)
-
-**Files to create:**
-- `src/writer/index.ts`
-- `src/utils/fs.ts`
-
-**Key Features:**
-- Create .claude/ directory structure
-- Write all generated files
-- Handle conflicts (ask to overwrite)
-- Generate settings.json
-- Display summary
-
-**Estimated Time:** 2-3 hours
-
-### Phase 6: Utilities & Polish (Priority: MEDIUM)
-
-**Files to create:**
-- `src/utils/logger.ts`
-- `src/config/agents.ts` (agent library definitions)
-- `src/config/skills.ts` (skill library definitions)
-
-**Key Features:**
-- Logging utility
-- Agent library catalog
-- Skill library catalog with auto-detect rules
-- Error handling improvements
-
-**Estimated Time:** 3-4 hours
-
-### Phase 7: Testing (Priority: MEDIUM)
-
-**Files to create:**
-- `tests/unit/analyzer.test.ts`
-- `tests/unit/generator.test.ts`
-- `tests/integration/cli.test.ts`
-- `tests/e2e/full-flow.test.ts`
-- `tests/fixtures/` (test project samples)
-
-**Estimated Time:** 4-6 hours
-
-### Phase 8: Distribution (Priority: LOW)
-
-**Tasks:**
-- npm package setup
-- Installation script
-- Release workflow
-- Documentation polish
-
-**Estimated Time:** 2-3 hours
-
-## 🎯 Recommended Development Order
-
-1. **Start with Codebase Analyzer** (Phase 1)
-   - Most critical component
-   - Easy to test independently
-   - No API calls needed (fast iteration)
-
-2. **Add Goal Analyzer** (Phase 2)
-   - Requires Anthropic API key
-   - Builds on analyzer foundation
-
-3. **Implement Recommendation Engine** (Phase 3)
-   - Combines the two analyzers
-   - Creates smart suggestions
-
-4. **Build AI Generator** (Phase 4)
-   - Core value proposition
-   - Requires all previous phases
-
-5. **Add Output Writer** (Phase 5)
-   - Final step in the pipeline
-   - Easy to test with mock data
-
-6. **Polish & Test** (Phases 6-8)
-   - After core functionality works
-
-## 💡 Development Tips
-
-### Environment Setup
-
-Create `.env` file:
-```bash
-ANTHROPIC_API_KEY=your_api_key_here
-```
-
-### Testing During Development
-
-```bash
-# Watch mode
-npm run dev
-
-# Test specific functionality
-node dist/index.js
-```
-
-### Debugging
-
-Add debug logs:
-```typescript
-import pc from 'picocolors';
-console.log(pc.dim('[DEBUG]'), 'Your message here');
-```
-
-### Code Style
-
-- Use TypeScript strict mode (already configured)
-- Follow existing patterns in CLI files
-- Add JSDoc comments for complex functions
-- Keep functions small and focused
-
-## 📚 Key Files to Reference
-
-When implementing each phase, refer to:
-
-1. **Architecture.md** - Detailed technical specs for each component
-2. **CLAUDE.md** - Development principles and patterns
-3. **src/types/** - All type definitions
-4. **src/config/presets.ts** - Example of how to structure config data
-
-## 🔧 Useful Commands
-
-```bash
-# Install dependencies
-npm install
-
-# Development (watch mode)
-npm run dev
-
-# Build
 npm run build
-
-# Type check
-npm run type-check
-
-# Lint
-npm run lint
-
-# Test (when implemented)
-npm test
-
-# Clean build
-npm run clean
+npm link  # Makes 'superagents' available globally
 ```
 
-## 🐛 Known Issues
+## Usage
 
-None yet! This is a fresh project.
+```bash
+# Navigate to any project directory
+cd your-project
 
-## ❓ Questions?
+# Run SuperAgents
+superagents
+```
 
-Refer to:
-- **Architecture.md** for technical details
-- **CLAUDE.md** for development workflow
-- **README.md** for user-facing documentation
+### What Happens
 
-## 🎉 You're Ready!
+1. **Goal Collection** - You describe what you're building
+2. **Authentication** - Choose Claude Plan (Max) or API Key
+3. **Model Selection** - Pick Sonnet (fast) or Opus (powerful)
+4. **Codebase Analysis** - Automatic detection of frameworks and patterns
+5. **Recommendations** - Smart suggestions based on goal + codebase
+6. **Agent/Skill Selection** - Choose which to generate
+7. **AI Generation** - Claude creates customized configs (with progress %)
+8. **Output** - `.claude/` folder created with all files
 
-The foundation is solid. Now it's time to implement the core features. Start with Phase 1 (Codebase Analyzer) and work your way through!
+### Example Session
 
-**Key Innovation:** SuperAgents asks "What are you building?" and uses that context to generate better Claude Code configurations than any other tool.
+```
+$ superagents
 
-Good luck! 🚀
+╔═══════════════════════════════════════════════════════════════╗
+║   SUPERAGENTS - Context-Aware Configuration Generator         ║
+╚═══════════════════════════════════════════════════════════════╝
+
+? What are you building?
+> A SaaS analytics dashboard with real-time charts
+
+? Project type
+> SaaS Dashboard (detected)
+
+? Authentication method
+> Claude Plan (using your Max subscription)
+
+? Which AI model should we use?
+> Claude Sonnet 4.5
+
+✓ Codebase analyzed
+✓ Recommendations generated
+
+? Select agents to include (space to toggle, enter to confirm)
+☑ frontend-engineer
+☑ backend-engineer
+☑ reviewer
+
+? Select skills to include
+☑ nextjs
+☑ typescript
+☑ react
+
+⠋ [25%] Generating agent: frontend-engineer...
+⠙ [50%] ✓ Agent frontend-engineer
+⠹ [75%] Generating skill: typescript...
+✔ Generation complete! [100%]
+
+✓ Success! Your Claude Code configuration is ready.
+```
+
+## Generated Output
+
+SuperAgents creates a `.claude/` folder in your project:
+
+```
+.claude/
+├── CLAUDE.md              # Project overview tailored to your goal
+├── settings.json          # Claude Code configuration
+├── agents/                # Specialized sub-agents
+│   ├── backend-engineer.md
+│   ├── frontend-engineer.md
+│   └── reviewer.md
+├── skills/                # Domain knowledge files
+│   ├── nodejs.md
+│   ├── typescript.md
+│   └── react.md
+└── hooks/
+    └── skill-loader.sh    # Auto-loads relevant skills
+```
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `superagents` | Run the configuration generator |
+| `superagents update` | Update to the latest version |
+
+## Authentication Methods
+
+### 1. Claude Plan (Max Subscription)
+
+If you have a Claude Max subscription and are logged into the `claude` CLI, SuperAgents can use your existing authentication. No API key needed!
+
+### 2. API Key
+
+Provide your Anthropic API key either:
+- Via environment variable: `ANTHROPIC_API_KEY=sk-...`
+- Via `.env` file in your project
+- By entering it when prompted
+
+## Updating
+
+```bash
+superagents update
+```
+
+This pulls the latest changes from GitHub if installed via curl, or runs `npm update` if installed via npm.
+
+## Project Structure
+
+```
+superagents/
+├── src/
+│   ├── index.ts              # CLI entry point with Commander.js
+│   ├── cli/                  # Interactive prompts and display
+│   │   ├── banner.ts         # ASCII art and success messages
+│   │   ├── prompts.ts        # @clack/prompts integration
+│   │   └── progress.ts       # Progress indicators
+│   ├── analyzer/             # Codebase analysis
+│   │   └── codebase-analyzer.ts
+│   ├── context/              # Recommendation engine
+│   │   └── recommendation-engine.ts
+│   ├── generator/            # AI-powered generation
+│   │   └── index.ts
+│   ├── writer/               # File output
+│   │   └── index.ts
+│   ├── utils/                # Utilities
+│   │   ├── auth.ts           # Authentication handling
+│   │   └── claude-cli.ts     # Claude CLI wrapper
+│   ├── config/               # Configuration
+│   │   └── presets.ts        # Goal presets
+│   └── types/                # TypeScript types
+├── bin/superagents           # Executable
+├── install.sh                # Installation script
+└── dist/                     # Compiled JavaScript
+```
+
+## Implementation Status
+
+All core features are implemented and working:
+
+| Feature | Status |
+|---------|--------|
+| CLI Interface | ✅ Complete |
+| Goal Collection | ✅ Complete |
+| Authentication (Claude Plan + API Key) | ✅ Complete |
+| Codebase Analysis | ✅ Complete |
+| Recommendation Engine | ✅ Complete |
+| AI Generation with Progress | ✅ Complete |
+| Output Writer | ✅ Complete |
+| Update Command | ✅ Complete |
+| Curl Installation | ✅ Complete |
+
+## Development
+
+### Prerequisites
+
+- Node.js 20+
+- npm
+
+### Setup
+
+```bash
+git clone https://github.com/rinaldofesta/superagents.git
+cd superagents
+npm install
+```
+
+### Commands
+
+```bash
+npm run dev        # Watch mode
+npm run build      # Compile TypeScript
+npm start          # Run compiled version
+npm test           # Run tests
+npm run type-check # TypeScript check
+npm run lint       # ESLint
+```
+
+### Making Changes
+
+1. Edit files in `src/`
+2. Run `npm run build`
+3. Test with `npm start` or `superagents`
+4. Commit and push
+
+## Troubleshooting
+
+### "Claude Code not authenticated"
+
+Make sure you're logged into Claude CLI:
+```bash
+claude --version
+```
+
+If not authenticated, SuperAgents will offer API Key authentication instead.
+
+### Generation seems slow
+
+- Each agent/skill takes ~10-30 seconds to generate
+- The progress indicator shows percentage complete
+- Using Sonnet is faster than Opus
+
+### Permission denied on install
+
+```bash
+chmod +x ~/.local/bin/superagents
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+MIT
 
 ---
 
-**Next command to run:**
-```bash
-npm install
-npm run dev
-```
+**SuperAgents** - Context-aware Claude Code configuration generator

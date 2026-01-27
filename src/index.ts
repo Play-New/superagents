@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * SuperAgents - Goal-Aware Claude Code Configuration Generator
+ * SuperAgents - Context-Aware Claude Code Configuration Generator
  *
  * Main entry point for the CLI application
  */
@@ -28,7 +28,7 @@ const program = new Command();
 
 program
   .name('superagents')
-  .description('Goal-aware Claude Code configuration generator')
+  .description('Context-aware Claude Code configuration generator')
   .version('1.0.0')
   .action(async () => {
     try {

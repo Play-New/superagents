@@ -21,7 +21,7 @@ export const BANNER = `
 ║  ██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   ███████║         ║
 ║  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝         ║
 ║                                                               ║
-║  Goal-Aware Claude Code Configuration Generator              ║
+║  Context-Aware Claude Code Configuration Generator              ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
 `;

@@ -341,7 +341,7 @@ Remember: This is a SAAS dashboard - performance and real-time updates are criti
 - Provide rules specific to the detected tech stack
 - Reference actual patterns found in the code
 
-### 2. Goal-Aware Guidance
+### 2. Context-Aware Guidance
 - Agents know what the user is trying to build
 - Tailor advice to the project category (SaaS, ecommerce, etc.)
 - Include technical requirements from the goal analysis

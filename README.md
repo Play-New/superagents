@@ -1,6 +1,6 @@
 # SuperAgents
 
-> **Goal-Aware Claude Code Configuration Generator**
+> **Context-Aware Claude Code Configuration Generator**
 
 SuperAgents is an intelligent CLI tool that generates highly customized Claude Code configurations (agents, skills, and hooks) based on both your existing codebase AND your project goals. Unlike traditional analyzers that only look at what you have, SuperAgents asks "What are you building?" to create forward-looking configurations that help you achieve your goals faster.
 
@@ -74,7 +74,7 @@ SuperAgents supports two authentication methods:
 $ superagents
 
 ╔═══════════════════════════════════════════════════════════════╗
-║   SUPERAGENTS - Goal-Aware Configuration Generator           ║
+║   SUPERAGENTS - Context-Aware Configuration Generator           ║
 ╚═══════════════════════════════════════════════════════════════╝
 
 ? What are you building?

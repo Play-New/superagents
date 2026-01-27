@@ -1,6 +1,6 @@
 # SuperAgents
 
-Goal-aware Claude Code configuration generator that asks "What are you building?" to create customized configurations (agents, skills, hooks) tailored to both your existing codebase AND your project goals.
+Context-aware Claude Code configuration generator that asks "What are you building?" to create customized configurations (agents, skills, hooks) tailored to both your existing codebase AND your project goals.
 
 ## Tech Stack
 
@@ -20,28 +20,18 @@ Goal-aware Claude Code configuration generator that asks "What are you building?
 ## Quick Start
 
 ```bash
-# Prerequisites: Node.js 20+
+# Install globally via curl
+curl -fsSL https://raw.githubusercontent.com/rinaldofesta/superagents/main/install.sh | bash
 
-# Install dependencies
+# Or clone and build locally
+git clone https://github.com/rinaldofesta/superagents.git
+cd superagents
 npm install
-
-# Development mode (watch)
-npm run dev
-
-# Build
 npm run build
-
-# Run locally
 npm start
 
-# Type check
-npm run type-check
-
-# Lint
-npm run lint
-
-# Run tests
-npm test
+# Update to latest version
+superagents update
 ```
 
 ## Project Structure
@@ -54,15 +44,27 @@ superagents/
 │   │   ├── banner.ts         # ASCII art, displaySuccess(), displayError()
 │   │   ├── prompts.ts        # collectProjectGoal(), selectModel(), confirmSelections()
 │   │   └── progress.ts       # ProgressIndicator class, withProgress() utility
+│   ├── analyzer/
+│   │   └── codebase-analyzer.ts  # Codebase analysis and pattern detection
+│   ├── context/
+│   │   └── recommendation-engine.ts  # Smart recommendations based on goal + codebase
+│   ├── generator/
+│   │   └── index.ts          # AI-powered agent/skill generation with Claude
+│   ├── writer/
+│   │   └── index.ts          # Output writer for .claude/ folder
+│   ├── utils/
+│   │   ├── auth.ts           # Authentication (Claude Plan or API Key)
+│   │   └── claude-cli.ts     # Claude CLI wrapper for Max subscribers
 │   ├── config/
 │   │   └── presets.ts        # GOAL_PRESETS for all 9 project types
 │   └── types/
-│       ├── goal.ts           # ProjectGoal, GoalCategory, GoalPreset, TechRequirement
-│       ├── codebase.ts       # CodebaseAnalysis, ProjectType, Framework, Pattern
-│       ├── generation.ts     # GenerationContext, GeneratedOutputs, WriteSummary
-│       └── config.ts         # AgentDefinition, SkillDefinition, Recommendations
+│       ├── goal.ts           # ProjectGoal, GoalCategory, GoalPreset
+│       ├── codebase.ts       # CodebaseAnalysis, ProjectType, Framework
+│       ├── generation.ts     # GenerationContext, GeneratedOutputs
+│       └── config.ts         # AgentDefinition, SkillDefinition
 ├── bin/
-│   └── superagents           # Executable entry point (imports dist/index.js)
+│   └── superagents           # Executable entry point
+├── install.sh                # Curl installation script
 ├── package.json
 ├── tsconfig.json
 └── .eslintrc.json
@@ -72,68 +74,76 @@ superagents/
 
 | Module | Status | Location |
 |--------|--------|----------|
-| CLI Interface | Complete | `src/cli/` |
-| Type System | Complete | `src/types/` |
-| Goal Presets | Complete | `src/config/presets.ts` |
-| Entry Point | Skeleton | `src/index.ts` |
-| Codebase Analyzer | Planned | `src/analyzer/` |
-| Goal Analyzer | Planned | `src/analyzer/` |
-| Recommendation Engine | Planned | `src/context/` |
-| AI Generator | Planned | `src/generator/` |
-| Output Writer | Planned | `src/writer/` |
+| CLI Interface | ✅ Complete | `src/cli/` |
+| Type System | ✅ Complete | `src/types/` |
+| Goal Presets | ✅ Complete | `src/config/presets.ts` |
+| Entry Point | ✅ Complete | `src/index.ts` |
+| Codebase Analyzer | ✅ Complete | `src/analyzer/codebase-analyzer.ts` |
+| Recommendation Engine | ✅ Complete | `src/context/recommendation-engine.ts` |
+| AI Generator | ✅ Complete | `src/generator/index.ts` |
+| Output Writer | ✅ Complete | `src/writer/index.ts` |
+| Authentication | ✅ Complete | `src/utils/auth.ts` |
+| Claude CLI Wrapper | ✅ Complete | `src/utils/claude-cli.ts` |
+| Update Command | ✅ Complete | `src/index.ts` |
 
 ## Architecture Overview
 
-SuperAgents uses a goal-first approach that differentiates it from traditional codebase analyzers:
+SuperAgents uses a context-first approach:
 
 ```
 1. Collect Goal     -> "What are you building?"
-2. Select Model     -> Claude Sonnet 4.5 or Opus 4.5
-3. Analyze Codebase -> Detect frameworks, patterns (TODO)
-4. Recommendations  -> Merge goal + codebase insights (TODO)
-5. User Confirms    -> Select agents and skills
-6. AI Generation    -> Claude creates custom configs (TODO)
-7. Write Output     -> .claude/ folder created (TODO)
+2. Authenticate     -> Claude Plan (Max) or API Key
+3. Select Model     -> Claude Sonnet 4.5 or Opus 4.5
+4. Analyze Codebase -> Detect frameworks, patterns, dependencies
+5. Recommendations  -> Merge goal + codebase insights
+6. User Confirms    -> Select agents and skills
+7. AI Generation    -> Claude creates custom configs (with progress %)
+8. Write Output     -> .claude/ folder created
 ```
 
 ### Key Modules
 
 | Module | Location | Purpose |
 |--------|----------|---------|
-| Banner | `src/cli/banner.ts:29-31` | `displayBanner()` shows ASCII art |
-| Banner | `src/cli/banner.ts:34-75` | `displaySuccess()` shows completion summary |
-| Prompts | `src/cli/prompts.ts:10-53` | `collectProjectGoal()` with category detection |
-| Prompts | `src/cli/prompts.ts:55-79` | `selectModel()` for AI model choice |
-| Prompts | `src/cli/prompts.ts:81-135` | `confirmSelections()` for agent/skill selection |
-| Progress | `src/cli/progress.ts:8-51` | `ProgressIndicator` class wrapping ora |
-| Progress | `src/cli/progress.ts:53-69` | `withProgress()` async helper |
-| Presets | `src/config/presets.ts:7-256` | `GOAL_PRESETS` for 9 goal categories |
+| Banner | `src/cli/banner.ts` | ASCII art and success/error displays |
+| Prompts | `src/cli/prompts.ts` | Interactive prompts with @clack/prompts |
+| Auth | `src/utils/auth.ts` | Two auth methods: Claude Plan or API Key |
+| Claude CLI | `src/utils/claude-cli.ts` | Wrapper for `claude` CLI (Max subscribers) |
+| Analyzer | `src/analyzer/codebase-analyzer.ts` | Codebase analysis |
+| Recommendations | `src/context/recommendation-engine.ts` | Smart agent/skill suggestions |
+| Generator | `src/generator/index.ts` | AI-powered generation with progress |
+| Writer | `src/writer/index.ts` | File output to .claude/ folder |
+| Presets | `src/config/presets.ts` | Goal presets for 9 project types |
+
+## Authentication
+
+SuperAgents supports two authentication methods:
+
+1. **Claude Plan (Max Subscription)** - Uses the `claude` CLI you're already logged into
+2. **API Key** - Direct Anthropic API key from environment or input
+
+The tool detects if you have Claude CLI authenticated and offers both options.
 
 ## Development Guidelines
 
 ### File Naming
-- Source files: `kebab-case.ts` (e.g., `goal-analyzer.ts`, `codebase.ts`)
+- Source files: `kebab-case.ts` (e.g., `codebase-analyzer.ts`)
 - Type files grouped in `types/` directory
 - Config files grouped in `config/` directory
-- Executable uses the package name directly (`superagents`)
 
 ### Code Naming
 - Interfaces/Types: `PascalCase` (e.g., `ProjectGoal`, `CodebaseAnalysis`)
 - Functions: `camelCase` (e.g., `collectProjectGoal`, `displayBanner`)
 - Constants: `SCREAMING_SNAKE_CASE` (e.g., `GOAL_PRESETS`, `BANNER`)
-- Type unions: `kebab-case` string literals (e.g., `'saas-dashboard' | 'ecommerce'`)
-- Private fields: Not used (prefer explicit naming)
 
 ### Import Order
 ```typescript
 // 1. External packages
 import { Command } from 'commander';
 import * as p from '@clack/prompts';
-import pc from 'picocolors';
 
 // 2. Internal types (with type keyword)
-import type { ProjectGoal, GoalCategory } from '../types/goal.js';
-import type { Recommendations } from '../types/config.js';
+import type { ProjectGoal } from '../types/goal.js';
 
 // 3. Internal modules
 import { displayBanner } from './cli/banner.js';
@@ -141,39 +151,46 @@ import { displayBanner } from './cli/banner.js';
 // Note: .js extension required for ESM imports
 ```
 
-### TypeScript Configuration
-- Strict mode enabled with additional checks:
-  - `noUnusedLocals`, `noUnusedParameters`
-  - `noImplicitReturns`, `noFallthroughCasesInSwitch`
-- Module: NodeNext (ESM)
-- Target: ES2022
-- Path alias: `@/*` maps to `./src/*` (defined but not currently used)
-
-### ESLint Rules
-- `@typescript-eslint/no-explicit-any`: warn
-- `@typescript-eslint/no-unused-vars`: error (allows `_` prefix)
-- `no-console`: off (CLI tool uses console extensively)
-
 ## Available Commands
 
 | Command | Description |
 |---------|-------------|
+| `superagents` | Run the main configuration generator |
+| `superagents update` | Update to the latest version |
 | `npm run dev` | Start in watch mode with tsx |
 | `npm run build` | Compile TypeScript to dist/ |
-| `npm start` | Run compiled version |
 | `npm test` | Run Vitest test suite |
-| `npm run test:watch` | Run tests in watch mode |
 | `npm run type-check` | TypeScript check without emit |
 | `npm run lint` | ESLint on src/ |
-| `npm run clean` | Remove dist/ |
 
-## Environment Variables
+## Generated Output Structure
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `ANTHROPIC_API_KEY` | Yes (for generation) | Claude API key for AI generation |
+SuperAgents generates:
 
-Create `.env` file for local development (excluded by .gitignore).
+```
+.claude/
+├── CLAUDE.md              # Project overview + goals
+├── settings.json          # Claude Code configuration
+├── skills/                # Tech-specific knowledge (.md files)
+│   ├── nodejs.md
+│   ├── typescript.md
+│   └── ...
+├── agents/                # Specialized sub-agents (.md files)
+│   ├── backend-engineer.md
+│   ├── code-reviewer.md
+│   └── ...
+└── hooks/
+    └── skill-loader.sh    # Auto-loads relevant skills
+```
+
+## Critical Rules
+
+1. **NEVER** log API keys or sensitive data
+2. **ALWAYS** respect .gitignore when sampling files
+3. **ALWAYS** validate AI-generated content before writing
+4. **NEVER** send entire codebases to Claude API (sample smartly)
+5. **ALWAYS** provide progress feedback for operations >2 seconds
+6. **NEVER** overwrite existing .claude/ without confirmation
 
 ## Key Types
 
@@ -191,20 +208,7 @@ type GoalCategory =
   | 'custom';           // Anything else
 ```
 
-### ProjectGoal (src/types/goal.ts)
-```typescript
-interface ProjectGoal {
-  description: string;                    // User's input
-  category: GoalCategory;                 // Detected/selected type
-  technicalRequirements: TechRequirement[];
-  suggestedAgents: AgentSuggestion[];
-  suggestedSkills: SkillSuggestion[];
-  timestamp: string;
-  confidence: number;                     // 0-1
-}
-```
-
-### GenerationContext (src/types/generation.ts)
+### GenerationContext
 ```typescript
 interface GenerationContext {
   goal: ProjectGoal;
@@ -212,119 +216,30 @@ interface GenerationContext {
   selectedAgents: string[];
   selectedSkills: string[];
   selectedModel: 'opus' | 'sonnet';
+  authMethod: 'claude-plan' | 'api-key';
+  apiKey?: string;
   sampledFiles: SampledFile[];
   generatedAt: string;
 }
 ```
 
-### GOAL_PRESETS (src/config/presets.ts)
-Each goal category has:
-- `recommendedAgents`: Array of { name, priority (1-10), reason }
-- `recommendedSkills`: Array of { name, priority (1-10), reason }
-- `technicalRequirements`: Array of { category, description, priority, suggestedTechnologies }
-
-## Generated Output Structure
-
-When complete, SuperAgents generates:
-
-```
-.claude/
-├── CLAUDE.md              # Project overview + goals
-├── settings.json          # Claude Code configuration
-├── skills/                # Tech-specific knowledge (.md files)
-│   ├── nextjs.md
-│   ├── typescript.md
-│   └── ...
-├── agents/                # Specialized sub-agents (.md files)
-│   ├── frontend-engineer.md
-│   ├── backend-engineer.md
-│   └── ...
-└── hooks/
-    └── skill-loader.sh    # Auto-loads relevant skills
-```
-
-## Critical Rules
-
-1. **NEVER** log API keys or sensitive data
-2. **ALWAYS** respect .gitignore when sampling files
-3. **ALWAYS** validate AI-generated content before writing
-4. **NEVER** send entire codebases to Claude API (sample smartly)
-5. **ALWAYS** provide progress feedback for operations >2 seconds
-6. **NEVER** overwrite existing .claude/ without confirmation
-7. **ALWAYS** use TypeScript strict mode
-8. **NEVER** execute generated code automatically
-
-## Error Handling Pattern
-
-```typescript
-// Use user-friendly errors with suggestions
-throw new UserFacingError(
-  'No project found',
-  'Run superagents in a directory with package.json or similar project file.'
-);
-```
-
-Current implementation uses standard try-catch with `displayError()` in `src/index.ts:82-88`.
-
-## Performance Targets
-
-- Initial analysis: <5 seconds
-- AI generation per agent: <10 seconds
-- Total workflow: <60 seconds for typical project
-
-## Development Principles
-
-1. **User-Centric Design**
-   - Every prompt should be clear and actionable
-   - Progress indicators for long operations
-   - Helpful error messages with suggestions
-
-2. **AI-First Architecture**
-   - Use Claude to generate project-specific content
-   - Avoid generic templates
-   - Context-rich prompts for better output
-
-3. **Privacy & Security**
-   - Never send secrets to API (.env files excluded)
-   - Respect .gitignore patterns
-   - Local-first processing
-
-4. **Extensibility**
-   - Plugin system for custom detectors (planned)
-   - Template overrides (planned)
-   - Community skill library (future)
-
-## Testing
-
-Test files use `*.test.ts` suffix and are run with Vitest:
-```bash
-npm test           # Run once
-npm run test:watch # Watch mode
-```
-
-Test fixtures should be placed in a `tests/fixtures/` directory (to be created).
-
 ## Additional Resources
 
-- @Architecture.md - Complete technical architecture (system design, data flow, AI prompts)
+- @Architecture.md - Complete technical architecture
 - @README.md - User-facing documentation
-- @GETTING_STARTED.md - Implementation roadmap with phases
-- @PROJECT_SUMMARY.md - Project overview and current status
-
+- @PROJECT_SUMMARY.md - Project overview and status
 
 ## Skill Usage Guide
 
-When working on tasks involving these technologies, invoke the corresponding skill:
-
 | Skill | Invoke When |
 |-------|-------------|
-| ora | Displays terminal spinners, progress indicators, and loading states |
-| commander | Builds CLI applications with command parsing and argument handling |
-| clack-prompts | Creates beautiful terminal prompts, selections, and interactive user input |
-| typescript | Enforces TypeScript strict mode, type safety, and compiler configuration |
-| nodejs | Manages Node.js runtime, ESM modules, and async/await patterns |
-| picocolors | Applies terminal text coloring and formatting for CLI output |
-| anthropic | Integrates Claude API for AI-powered text generation and analysis |
-| fs-extra | Performs enhanced file system operations and directory management |
-| zod | Validates runtime data schemas and provides type safety |
-| vitest | Runs unit and integration tests with fast iteration and coverage |
+| ora | Displays terminal spinners, progress indicators |
+| commander | CLI command parsing and argument handling |
+| clack-prompts | Interactive terminal prompts and selections |
+| typescript | TypeScript strict mode and type safety |
+| nodejs | Node.js runtime, ESM modules, async/await |
+| picocolors | Terminal text coloring and formatting |
+| anthropic | Claude API integration |
+| fs-extra | Enhanced file system operations |
+| zod | Runtime schema validation |
+| vitest | Unit and integration tests |

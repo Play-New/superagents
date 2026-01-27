@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * SuperAgents - Goal-Aware Claude Code Configuration Generator
+ * SuperAgents - Context-Aware Claude Code Configuration Generator
  *
  * Main entry point for the CLI application
  */
