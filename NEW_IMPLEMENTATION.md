@@ -1871,11 +1871,11 @@ interface SuperAgentsPlugin {
 
 ## Rollout Plan
 
-### Version 1.1 (Phase 1)
-- [ ] Parallel generation
-- [ ] Tiered model selection
-- [ ] --dry-run flag
-- [ ] --verbose flag
+### Version 1.1 (Phase 1) ✅ COMPLETED
+- [x] Parallel generation
+- [x] Tiered model selection
+- [x] --dry-run flag
+- [x] --verbose flag
 
 ### Version 1.2 (Phase 2)
 - [ ] Codebase cache
@@ -1903,15 +1903,15 @@ interface SuperAgentsPlugin {
 
 ## Checklist Summary
 
-### Phase 1: Quick Wins
-- [ ] 1.1 Install p-limit, create concurrency.ts
-- [ ] 1.1 Update generator for parallel generation
-- [ ] 1.2 Create model-selector.ts
-- [ ] 1.2 Update generator to use tiered models
-- [ ] 1.3 Create dry-run.ts
-- [ ] 1.3 Add --dry-run flag to CLI
-- [ ] 1.4 Create logger.ts
-- [ ] 1.4 Add --verbose flag to CLI
+### Phase 1: Quick Wins ✅ COMPLETED
+- [x] 1.1 Install p-limit, create concurrency.ts
+- [x] 1.1 Update generator for parallel generation
+- [x] 1.2 Create model-selector.ts
+- [x] 1.2 Update generator to use tiered models
+- [x] 1.3 Create dry-run.ts
+- [x] 1.3 Add --dry-run flag to CLI
+- [x] 1.4 Create logger.ts
+- [x] 1.4 Add --verbose flag to CLI
 
 ### Phase 2: Performance
 - [ ] 2.1 Create cache/index.ts
