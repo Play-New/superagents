@@ -27,9 +27,9 @@ export class OutputWriter {
     await fs.ensureDir(path.join(claudeDir, 'skills'));
     await fs.ensureDir(path.join(claudeDir, 'hooks'));
 
-    // Write CLAUDE.md
+    // Write CLAUDE.md to project root (not inside .claude/)
     await fs.writeFile(
-      path.join(claudeDir, 'CLAUDE.md'),
+      path.join(this.projectRoot, 'CLAUDE.md'),
       outputs.claudeMd,
       'utf-8'
     );
