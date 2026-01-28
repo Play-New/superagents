@@ -15,6 +15,12 @@ import { parallelGenerateWithErrors } from '../utils/concurrency.js';
 import { selectModel, getSkillComplexity, getModelDisplayName } from '../utils/model-selector.js';
 import { log } from '../utils/logger.js';
 import { cache, type GenerationCacheKey } from '../cache/index.js';
+import {
+  buildAgentPrompt as buildCompressedAgentPrompt,
+  buildSkillPrompt as buildCompressedSkillPrompt,
+  buildClaudeMdPrompt as buildCompressedClaudeMdPrompt
+} from '../prompts/templates.js';
+import { hasTemplate, loadTemplate } from '../templates/loader.js';
 
 export class AIGenerator {
   private codebaseHash: string = '';
@@ -190,7 +196,8 @@ export class AIGenerator {
   }
 
   /**
-   * Generate an agent using Claude AI (with caching)
+   * Generate an agent using local template or Claude AI (with caching)
+   * Priority: 1. Cache, 2. Local template, 3. API
    */
   private async generateAgent(agentName: string, context: GenerationContext, model: string): Promise<string> {
     // Build cache key
@@ -209,6 +216,16 @@ export class AIGenerator {
       return cached;
     }
 
+    // Check for local template (reduces API calls)
+    if (hasTemplate('agent', agentName)) {
+      const template = await loadTemplate('agent', agentName, context);
+      if (template) {
+        log.verbose(`Using local template for agent: ${agentName}`);
+        await cache.setCachedGeneration(cacheKey, template);
+        return template;
+      }
+    }
+
     // Generate via API
     const prompt = this.buildAgentPrompt(agentName, context);
     const response = await this.executePrompt(prompt, context, model);
@@ -224,7 +241,8 @@ export class AIGenerator {
   }
 
   /**
-   * Generate a skill using Claude AI (with caching)
+   * Generate a skill using local template or Claude AI (with caching)
+   * Priority: 1. Cache, 2. Local template, 3. API
    */
   private async generateSkill(skillName: string, context: GenerationContext, model: string): Promise<string> {
     // Build cache key
@@ -241,6 +259,16 @@ export class AIGenerator {
     if (cached) {
       log.verbose(`Cache hit for skill: ${skillName}`);
       return cached;
+    }
+
+    // Check for local template (reduces API calls)
+    if (hasTemplate('skill', skillName)) {
+      const template = await loadTemplate('skill', skillName, context);
+      if (template) {
+        log.verbose(`Using local template for skill: ${skillName}`);
+        await cache.setCachedGeneration(cacheKey, template);
+        return template;
+      }
     }
 
     // Generate via API
@@ -292,333 +320,27 @@ export class AIGenerator {
   }
 
   /**
-   * Build comprehensive prompt for agent generation
+   * Build compressed prompt for agent generation
+   * Uses centralized templates for consistency and reduced token usage
    */
   private buildAgentPrompt(agentName: string, context: GenerationContext): string {
-    // Limit sampled files to reduce prompt size (max 3 files, 1000 chars each)
-    const limitedFiles = context.sampledFiles.slice(0, 3);
-    const sampledFilesSection = limitedFiles.length > 0
-      ? `\n### Sample Files from Codebase\n\n${limitedFiles.map(f =>
-          `**${f.path}**:\n\`\`\`\n${f.content.slice(0, 1000)}\n\`\`\`\n`
-        ).join('\n')}`
-      : '';
-
-    return `You are generating a specialized Claude Code agent configuration file.
-
-## USER'S PROJECT GOAL
-
-**Goal Description:** ${context.goal.description}
-
-**Project Category:** ${context.goal.category}
-
-**Technical Requirements:**
-${context.goal.technicalRequirements?.map(req =>
-  `- ${req.category}: ${req.description} (${req.priority})`
-).join('\n') || 'None specified'}
-
-## CURRENT CODEBASE STATE
-
-**Project Type:** ${context.codebase.projectType}
-**Language:** ${context.codebase.language || 'Not detected'}
-**Framework:** ${context.codebase.framework || 'None detected'}
-
-**Key Dependencies:**
-${context.codebase.dependencies.slice(0, 10).map(d => `- ${d.name}@${d.version} (${d.category})`).join('\n') || 'None detected'}
-
-**Detected Patterns:**
-${context.codebase.detectedPatterns.map(p =>
-  `- ${p.type}: ${p.description} (${p.paths.length} files)`
-).join('\n') || 'None detected'}
-${sampledFilesSection}
-
-## AGENT TO GENERATE
-
-**Agent Name:** ${agentName}
-
-**Available Skills:** ${context.selectedSkills.join(', ')}
-
-## YOUR TASK
-
-Generate a complete, detailed agent markdown file that:
-
-1. **Understands the PROJECT GOAL** - What the user is trying to build
-2. **Knows the CODEBASE** - Framework, patterns, and file structure
-3. **Provides SPECIFIC GUIDANCE** - Not generic advice, but tailored to THIS project
-4. **Includes REAL EXAMPLES** - Code patterns matching the detected codebase style
-5. **Has ACTIONABLE RULES** - Critical rules specific to this project's stack
-
-## OUTPUT FORMAT
-
-Start with YAML frontmatter, then markdown content:
-
-\`\`\`yaml
----
-name: ${agentName}
-description: |
-  [2-3 line description explaining what this agent does and when to use it.
-  Be specific to the project goal and tech stack.]
-tools: Read, Edit, Write, Glob, Grep, Bash, mcp__context7__resolve-library-id, mcp__context7__query-docs
-model: ${context.selectedModel}
-skills: ${context.selectedSkills.join(', ')}
----
-\`\`\`
-
-# ${agentName}
-
-You are a senior ${agentName} working on: **${context.goal.description}**
-
-## Project Context
-
-[Describe the project, goal, and current state. Be specific about what's being built.]
-
-## Tech Stack
-
-[List the specific technologies detected in this codebase]
-
-## Key File Locations
-
-[Based on the sampled files and patterns, describe the actual directory structure]
-
-\`\`\`
-[show actual file structure]
-\`\`\`
-
-## Code Patterns and Conventions
-
-[Describe the actual patterns detected in the codebase. Include real code examples from the sampled files if relevant.]
-
-## Critical Rules
-
-1. [Numbered list of must-follow rules specific to this project's tech stack]
-2. [Include framework-specific best practices]
-3. [Include goal-specific requirements]
-4. [Reference Context7 usage when appropriate]
-
-## Context7 Usage
-
-When you need up-to-date documentation for any library used in this project:
-1. Use mcp__context7__resolve-library-id to find the library
-2. Use mcp__context7__query-docs to get specific documentation
-
----
-
-Be SPECIFIC, ACTIONABLE, and PROJECT-FOCUSED. Avoid generic advice.`;
+    return buildCompressedAgentPrompt(agentName, context);
   }
 
   /**
-   * Build comprehensive prompt for skill generation
+   * Build compressed prompt for skill generation
+   * Uses centralized templates for consistency and reduced token usage
    */
   private buildSkillPrompt(skillName: string, context: GenerationContext): string {
-    const relevantFiles = context.sampledFiles.filter(f =>
-      f.content.toLowerCase().includes(skillName) ||
-      f.path.toLowerCase().includes(skillName)
-    );
-
-    const examplesSection = relevantFiles.length > 0
-      ? `\n### Examples from This Codebase\n\n${relevantFiles.slice(0, 3).map(f =>
-          `**${f.path}**:\n\`\`\`\n${f.content.slice(0, 1500)}\n\`\`\`\n`
-        ).join('\n')}`
-      : '';
-
-    return `You are generating a skill file for Claude Code that provides domain knowledge about ${skillName}.
-
-## PROJECT CONTEXT
-
-**Goal:** ${context.goal.description}
-**Category:** ${context.goal.category}
-**Framework:** ${context.codebase.framework || 'None'}
-**Language:** ${context.codebase.language || 'Not detected'}
-
-**How ${skillName} is used in this project:**
-${context.codebase.dependencies.find(d => d.name.includes(skillName))
-  ? `Detected as dependency: ${context.codebase.dependencies.find(d => d.name.includes(skillName))?.version}`
-  : 'Part of the tech stack for ' + context.goal.category
-}
-
-**Detected Patterns:**
-${context.codebase.detectedPatterns.map(p => `- ${p.type}: ${p.description}`).join('\n') || 'None'}
-${examplesSection}
-
-## YOUR TASK
-
-Generate a comprehensive skill file that provides practical knowledge about ${skillName} specifically for THIS project.
-
-Include:
-- When to use this skill
-- Key concepts relevant to ${context.goal.category} projects
-- Code examples matching this project's style
-- Common pitfalls specific to this stack
-- Related skills
-
-## OUTPUT FORMAT
-
-\`\`\`markdown
-# ${skillName} Skill
-
-> [Brief description of what this skill covers]
-
-## When to Use
-
-[Describe when this skill is relevant, specific to ${context.goal.category} projects]
-
-## Key Concepts
-
-| Concept | Description | Example Use Case |
-|---------|-------------|------------------|
-| [concept] | [what it is] | [when to use in this project] |
-
-## Project-Specific Patterns
-
-[Describe how ${skillName} is actually used in THIS codebase. Use examples from the sampled files.]
-
-## Code Examples
-
-[Provide 2-3 code examples that match the style and patterns detected in this project]
-
-\`\`\`${context.codebase.language === 'typescript' ? 'typescript' : 'javascript'}
-// Example 1: [describe what this shows]
-[code example matching project style]
-\`\`\`
-
-## Common Pitfalls
-
-- [Pitfall 1 specific to this tech stack]
-- [Pitfall 2 with explanation]
-- [How to avoid them]
-
-## Related Skills
-
-- [List other skills that work well with this one]
-
-## Context7 Resources
-
-For up-to-date ${skillName} documentation, use:
-\`\`\`
-mcp__context7__resolve-library-id with "${skillName}"
-mcp__context7__query-docs for specific questions
-\`\`\`
-
----
-
-Generated by SuperAgents for ${context.goal.category} project
-\`\`\`
-
-Be SPECIFIC to this project, include REAL examples, and focus on PRACTICAL usage.`;
+    return buildCompressedSkillPrompt(skillName, context);
   }
 
   /**
-   * Build prompt for CLAUDE.md generation
+   * Build compressed prompt for CLAUDE.md generation
+   * Uses centralized templates for consistency and reduced token usage
    */
   private buildClaudeMdPrompt(context: GenerationContext): string {
-    return `You are generating the root CLAUDE.md file for a Claude Code project.
-
-## USER'S GOAL
-
-${context.goal.description}
-
-**Category:** ${context.goal.category}
-
-**Technical Requirements:**
-${context.goal.technicalRequirements?.map(req =>
-  `- ${req.category}: ${req.description}`
-).join('\n') || 'To be determined'}
-
-## CURRENT CODEBASE
-
-**Project Type:** ${context.codebase.projectType}
-**Language:** ${context.codebase.language || 'Not detected'}
-**Framework:** ${context.codebase.framework || 'None'}
-
-**Dependencies:**
-${context.codebase.dependencies.slice(0, 10).map(d => `- ${d.name}@${d.version}`).join('\n')}
-
-**Detected Patterns:**
-${context.codebase.detectedPatterns.map(p =>
-  `- ${p.type}: ${p.paths.length} files`
-).join('\n') || 'None yet'}
-
-**File Structure:**
-${context.sampledFiles.map(f => `- ${f.path}`).join('\n')}
-
-## SELECTED CONFIGURATIONS
-
-**Agents:** ${context.selectedAgents.join(', ')}
-**Skills:** ${context.selectedSkills.join(', ')}
-
-## YOUR TASK
-
-Generate a comprehensive CLAUDE.md file that:
-1. Describes the project's goal and vision
-2. Documents the current tech stack
-3. Explains the project structure
-4. Lists available agents with when to use each
-5. Lists available skills with descriptions
-6. Provides quick-start guidance
-
-## OUTPUT FORMAT
-
-\`\`\`markdown
-# ${context.goal.description}
-
-## Vision
-
-[Expand on the project goal - what are we building and why?]
-
-**Project Type:** ${context.goal.category}
-**Status:** ${context.codebase.totalFiles > 0 ? 'Enhancing existing codebase' : 'Starting new project'}
-**Generated:** ${new Date(context.generatedAt).toLocaleString()}
-
-## What We're Building
-
-[Detailed description of the project vision and key objectives]
-
-Key objectives:
-${context.goal.technicalRequirements?.map(req => `- ${req.description}`).join('\n') || '- To be defined'}
-
-## Current Tech Stack
-
-[List the actual technologies detected in the codebase]
-
-## Project Structure
-
-[Describe the actual file structure based on detected patterns and sampled files]
-
-## Detected Patterns
-
-[For each detected pattern, explain what it is and how many files]
-
-## Available Agents
-
-Use \`/agent <name>\` to switch to specialized agents:
-
-${context.selectedAgents.map(name => `- **${name}** - [when to use this agent]`).join('\n')}
-
-## Available Skills
-
-Use \`Skill(name)\` to load domain knowledge:
-
-${context.selectedSkills.map(name => `- **${name}** - [what this skill provides]`).join('\n')}
-
-## Quick Start
-
-### Common Workflows
-
-1. **Adding New Features**
-   - [Specific steps for this project]
-
-2. **Making Changes**
-   - [How to approach changes]
-
-3. **Getting Help**
-   - Use Context7 for up-to-date docs
-   - Ask agents for specific guidance
-
----
-
-Generated by SuperAgents - Context-aware configuration for Claude Code
-\`\`\`
-
-Be SPECIFIC, DETAILED, and PROJECT-FOCUSED.`;
+    return buildCompressedClaudeMdPrompt(context);
   }
 
   private generatePlaceholderAgent(name: string, context: GenerationContext): string {
