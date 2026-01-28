@@ -23,8 +23,8 @@ export class OutputWriter {
         await fs.ensureDir(path.join(claudeDir, 'agents'));
         await fs.ensureDir(path.join(claudeDir, 'skills'));
         await fs.ensureDir(path.join(claudeDir, 'hooks'));
-        // Write CLAUDE.md
-        await fs.writeFile(path.join(claudeDir, 'CLAUDE.md'), outputs.claudeMd, 'utf-8');
+        // Write CLAUDE.md to project root (not inside .claude/)
+        await fs.writeFile(path.join(this.projectRoot, 'CLAUDE.md'), outputs.claudeMd, 'utf-8');
         // Write agents
         for (const agent of outputs.agents) {
             await fs.writeFile(path.join(claudeDir, 'agents', agent.filename), agent.content, 'utf-8');

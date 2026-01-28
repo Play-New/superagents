@@ -1,7 +1,7 @@
 /**
  * Codebase analyzer - detects project type, frameworks, and patterns
  */
-import type { CodebaseAnalysis } from '../types/codebase.js';
+import type { CodebaseAnalysis, MonorepoInfo } from '../types/codebase.js';
 export declare class CodebaseAnalyzer {
     private projectRoot;
     constructor(projectRoot: string);
@@ -22,5 +22,9 @@ export declare class CodebaseAnalyzer {
      * Try to add a file to sampled files array
      */
     private tryAddFile;
+    /**
+     * Detect if project is a monorepo and identify packages
+     */
+    detectMonorepo(): Promise<MonorepoInfo | null>;
 }
 //# sourceMappingURL=codebase-analyzer.d.ts.map

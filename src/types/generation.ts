@@ -6,6 +6,8 @@ import type { ProjectGoal } from './goal.js';
 import type { CodebaseAnalysis, SampledFile } from './codebase.js';
 import type { AuthMethod } from '../utils/auth.js';
 
+export type TargetIDE = 'claude' | 'cursor';
+
 export interface GenerationContext {
   // User's vision
   goal: ProjectGoal;
@@ -17,6 +19,9 @@ export interface GenerationContext {
   selectedAgents: string[];
   selectedSkills: string[];
   selectedModel: 'opus' | 'sonnet';
+
+  // Target IDE (affects output format)
+  targetIDE: TargetIDE;
 
   // Authentication
   authMethod: AuthMethod;

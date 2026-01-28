@@ -21,6 +21,7 @@ import {
   buildClaudeMdPrompt as buildCompressedClaudeMdPrompt
 } from '../prompts/templates.js';
 import { hasTemplate, loadTemplate } from '../templates/loader.js';
+import { hasCustomTemplate, loadCustomTemplate } from '../templates/custom.js';
 
 export class AIGenerator {
   private codebaseHash: string = '';
@@ -216,11 +217,21 @@ export class AIGenerator {
       return cached;
     }
 
-    // Check for local template (reduces API calls)
+    // Check for custom template first (user-provided takes priority)
+    if (await hasCustomTemplate('agent', agentName)) {
+      const template = await loadCustomTemplate('agent', agentName, context);
+      if (template) {
+        log.verbose(`Using custom template for agent: ${agentName}`);
+        await cache.setCachedGeneration(cacheKey, template);
+        return template;
+      }
+    }
+
+    // Check for built-in template (reduces API calls)
     if (hasTemplate('agent', agentName)) {
       const template = await loadTemplate('agent', agentName, context);
       if (template) {
-        log.verbose(`Using local template for agent: ${agentName}`);
+        log.verbose(`Using built-in template for agent: ${agentName}`);
         await cache.setCachedGeneration(cacheKey, template);
         return template;
       }
@@ -261,11 +272,21 @@ export class AIGenerator {
       return cached;
     }
 
-    // Check for local template (reduces API calls)
+    // Check for custom template first (user-provided takes priority)
+    if (await hasCustomTemplate('skill', skillName)) {
+      const template = await loadCustomTemplate('skill', skillName, context);
+      if (template) {
+        log.verbose(`Using custom template for skill: ${skillName}`);
+        await cache.setCachedGeneration(cacheKey, template);
+        return template;
+      }
+    }
+
+    // Check for built-in template (reduces API calls)
     if (hasTemplate('skill', skillName)) {
       const template = await loadTemplate('skill', skillName, context);
       if (template) {
-        log.verbose(`Using local template for skill: ${skillName}`);
+        log.verbose(`Using built-in template for skill: ${skillName}`);
         await cache.setCachedGeneration(cacheKey, template);
         return template;
       }

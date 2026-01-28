@@ -6,6 +6,8 @@ import * as p from '@clack/prompts';
 import pc from 'picocolors';
 import type { GoalCategory } from '../types/goal.js';
 import type { Recommendations } from '../types/config.js';
+import type { TargetIDE } from '../types/generation.js';
+import type { MonorepoPackage } from '../types/codebase.js';
 
 export async function collectProjectGoal(): Promise<{ description: string; category: GoalCategory }> {
   p.intro(pc.bgCyan(pc.black(' SuperAgents ')));
@@ -70,6 +72,34 @@ export async function collectProjectGoal(): Promise<{ description: string; categ
     description: answers.description as string,
     category: answers.category as GoalCategory
   };
+}
+
+export async function selectIDE(): Promise<TargetIDE> {
+  const result = await p.group({
+    ide: () => p.select<{ value: TargetIDE; label: string; hint: string }[], TargetIDE>({
+      message: 'Which IDE are you using?',
+      options: [
+        {
+          value: 'claude',
+          label: 'Claude Code',
+          hint: 'Official Anthropic CLI (recommended)'
+        },
+        {
+          value: 'cursor',
+          label: 'Cursor',
+          hint: 'AI-powered code editor'
+        }
+      ],
+      initialValue: 'claude'
+    })
+  }, {
+    onCancel: () => {
+      p.cancel('Operation cancelled');
+      process.exit(0);
+    }
+  });
+
+  return result.ide;
 }
 
 export async function selectModel(): Promise<'opus' | 'sonnet'> {
@@ -156,9 +186,9 @@ export async function confirmSelections(recommendations: Recommendations): Promi
   return { agents, skills };
 }
 
-export async function confirmOverwrite(): Promise<boolean> {
+export async function confirmOverwrite(dirName = '.claude'): Promise<boolean> {
   const shouldOverwrite = await p.confirm({
-    message: '.claude directory already exists. Overwrite?',
+    message: `${dirName} directory already exists. Overwrite?`,
     initialValue: false
   });
 
@@ -167,6 +197,32 @@ export async function confirmOverwrite(): Promise<boolean> {
   }
 
   return shouldOverwrite as boolean;
+}
+
+export async function selectPackages(packages: MonorepoPackage[]): Promise<string[]> {
+  p.note(
+    `Found ${packages.length} packages in this monorepo:\n` +
+    packages.map(p => `  ${pc.green('•')} ${p.name} (${p.relativePath})`).join('\n'),
+    'Monorepo Detected'
+  );
+
+  const selected = await p.multiselect({
+    message: `Select packages to configure ${pc.dim('(space to toggle, enter to confirm)')}`,
+    options: packages.map(pkg => ({
+      value: pkg.relativePath,
+      label: pkg.name,
+      hint: pkg.relativePath,
+      selected: true // Default to all selected
+    })),
+    required: true
+  }) as string[];
+
+  if (p.isCancel(selected)) {
+    p.cancel('Operation cancelled');
+    process.exit(0);
+  }
+
+  return selected;
 }
 
 // Helper functions

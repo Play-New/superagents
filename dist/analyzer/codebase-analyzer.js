@@ -12,11 +12,12 @@ export class CodebaseAnalyzer {
     async analyze() {
         const startTime = Date.now();
         // Run analysis in parallel for performance
-        const [projectType, framework, hasPackageJson, hasTsConfig] = await Promise.all([
+        const [projectType, framework, hasPackageJson, hasTsConfig, monorepo] = await Promise.all([
             this.detectProjectType(),
             this.detectFramework(),
             fs.pathExists(path.join(this.projectRoot, 'package.json')),
-            fs.pathExists(path.join(this.projectRoot, 'tsconfig.json'))
+            fs.pathExists(path.join(this.projectRoot, 'tsconfig.json')),
+            this.detectMonorepo()
         ]);
         const language = hasTsConfig ? 'typescript' : 'javascript';
         // Get dependencies if package.json exists
@@ -45,6 +46,7 @@ export class CodebaseAnalyzer {
             suggestedAgents,
             existingClaudeConfig: null,
             mcpServers: [],
+            monorepo,
             sampledFiles,
             analyzedAt: new Date().toISOString(),
             analysisTimeMs: Date.now() - startTime
@@ -303,6 +305,92 @@ export class CodebaseAnalyzer {
         catch (error) {
             // Silently skip files that can't be read
         }
+    }
+    /**
+     * Detect if project is a monorepo and identify packages
+     */
+    async detectMonorepo() {
+        const pkgPath = path.join(this.projectRoot, 'package.json');
+        if (!(await fs.pathExists(pkgPath))) {
+            return null;
+        }
+        const pkg = await fs.readJson(pkgPath);
+        let tool = null;
+        let workspaceGlobs = [];
+        // Check for npm/yarn workspaces
+        if (pkg.workspaces) {
+            workspaceGlobs = Array.isArray(pkg.workspaces) ? pkg.workspaces : pkg.workspaces.packages || [];
+            tool = 'npm';
+            // Check for yarn specifically
+            if (await fs.pathExists(path.join(this.projectRoot, 'yarn.lock'))) {
+                tool = 'yarn';
+            }
+        }
+        // Check for pnpm workspace
+        const pnpmWorkspacePath = path.join(this.projectRoot, 'pnpm-workspace.yaml');
+        if (await fs.pathExists(pnpmWorkspacePath)) {
+            tool = 'pnpm';
+            const content = await fs.readFile(pnpmWorkspacePath, 'utf-8');
+            const match = content.match(/packages:\s*\n([\s\S]*?)(?=\n\w|\n$|$)/);
+            if (match) {
+                workspaceGlobs = match[1]
+                    .split('\n')
+                    .map(line => line.trim().replace(/^-\s*['"]?|['"]?$/g, ''))
+                    .filter(line => line.length > 0);
+            }
+        }
+        // Check for lerna
+        const lernaPath = path.join(this.projectRoot, 'lerna.json');
+        if (await fs.pathExists(lernaPath)) {
+            tool = 'lerna';
+            const lerna = await fs.readJson(lernaPath);
+            workspaceGlobs = lerna.packages || ['packages/*'];
+        }
+        // Check for turborepo
+        const turboPath = path.join(this.projectRoot, 'turbo.json');
+        if (await fs.pathExists(turboPath)) {
+            tool = 'turborepo';
+        }
+        // Check for nx
+        const nxPath = path.join(this.projectRoot, 'nx.json');
+        if (await fs.pathExists(nxPath)) {
+            tool = 'nx';
+        }
+        // If no monorepo tool found, return null
+        if (!tool || workspaceGlobs.length === 0) {
+            return null;
+        }
+        // Find all packages matching the workspace globs
+        const packages = [];
+        for (const workspaceGlob of workspaceGlobs) {
+            const matchingPaths = await glob(workspaceGlob, {
+                cwd: this.projectRoot,
+                ignore: ['node_modules/**']
+            });
+            for (const relativePath of matchingPaths) {
+                const packagePath = path.join(this.projectRoot, relativePath);
+                const packageJsonPath = path.join(packagePath, 'package.json');
+                const hasPackageJson = await fs.pathExists(packageJsonPath);
+                let name = path.basename(relativePath);
+                if (hasPackageJson) {
+                    const packageJson = await fs.readJson(packageJsonPath);
+                    name = packageJson.name || name;
+                }
+                packages.push({
+                    name,
+                    path: packagePath,
+                    relativePath,
+                    hasPackageJson
+                });
+            }
+        }
+        return {
+            isMonorepo: packages.length > 0,
+            tool,
+            rootPackageJson: pkgPath,
+            packages,
+            workspaceGlobs
+        };
     }
 }
 //# sourceMappingURL=codebase-analyzer.js.map

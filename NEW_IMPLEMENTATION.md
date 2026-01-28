@@ -12,7 +12,7 @@
 | Phase 2: Performance          | ✅ DONE    | v1.2.0  | 2026-01-27 | ~3h         |
 | **Refactoring: Code Quality** | ✅ DONE    | v1.2.1  | 2026-01-28 | ~2h         |
 | Phase 3: Cost Reduction       | ✅ DONE    | v1.3.0  | 2026-01-28 | ~4h         |
-| Phase 4: New Features         | ⏳ Pending | v1.3.0  | -          | Est. 19-25h |
+| Phase 4: New Features         | ✅ DONE    | v1.3.0  | 2026-01-28 | ~6h         |
 | Phase 5: Technical            | ⏳ Pending | v1.4.0  | -          | Est. 10-14h |
 | Phase 6: Advanced             | ⏳ Pending | v2.0.0  | -          | Est. 35-50h |
 
@@ -33,7 +33,12 @@
 - ✅ Input validation (prevents runtime errors)
 - ✅ Code quality improvements (dead code removed, ~77 LOC reduction)
 - ✅ Prompt compression (~40-50% token reduction)
-- ✅ Local templates (5 agents, 5 skills - no API needed)
+- ✅ Local templates (11 agents, 16 skills - no API needed)
+- ✅ Cursor IDE support (.cursor/rules/ output)
+- ✅ --update mode (incremental configuration updates)
+- ✅ Custom templates (user-provided templates in ~/.superagents/templates/)
+- ✅ Export/import (share configs via zip files)
+- ✅ Monorepo support (detect npm/yarn/pnpm/lerna/turborepo/nx workspaces)
 
 ### CLI Commands Available
 
@@ -228,8 +233,8 @@ Comprehensive refactoring to align codebase with new coding principles from CLAU
 
 **Files to modify:**
 
-- [ ] `src/updater/index.ts` (new)
-- [ ] `src/index.ts` (add --update flag)
+- [x] `src/updater/index.ts` (new)
+- [x] `src/index.ts` (add --update flag)
 
 #### 4.2 Monorepo Support (~5-6h)
 
@@ -244,9 +249,9 @@ Comprehensive refactoring to align codebase with new coding principles from CLAU
 
 **Files to modify:**
 
-- [ ] `src/analyzer/codebase-analyzer.ts` (add `detectMonorepo()`)
-- [ ] `src/types/codebase.ts` (add `MonorepoInfo` type)
-- [ ] `src/cli/prompts.ts` (add package selection)
+- [x] `src/analyzer/codebase-analyzer.ts` (add `detectMonorepo()`)
+- [x] `src/types/codebase.ts` (add `MonorepoInfo` type)
+- [x] `src/cli/prompts.ts` (add package selection)
 
 #### 4.3 Custom Templates (~3-4h)
 
@@ -260,9 +265,9 @@ Comprehensive refactoring to align codebase with new coding principles from CLAU
 
 **Files to modify:**
 
-- [ ] `src/templates/custom.ts` (new)
-- [ ] `src/index.ts` (add templates command)
-- [ ] `src/generator/index.ts` (check custom templates)
+- [x] `src/templates/custom.ts` (new)
+- [x] `src/index.ts` (add templates command)
+- [x] `src/generator/index.ts` (check custom templates)
 
 #### 4.4 Config Export/Import (~3-4h)
 
@@ -276,9 +281,9 @@ Comprehensive refactoring to align codebase with new coding principles from CLAU
 
 **Files to modify:**
 
-- [ ] `src/config/export-import.ts` (new)
-- [ ] `src/index.ts` (add export/import commands)
-- [ ] `package.json` (add archiver, unzipper deps)
+- [x] `src/config/export-import.ts` (new)
+- [x] `src/index.ts` (add export/import commands)
+- [x] `package.json` (add archiver, unzipper deps)
 
 #### 4.5 Cursor IDE Support (~4-5h)
 
@@ -338,12 +343,12 @@ Comprehensive refactoring to align codebase with new coding principles from CLAU
 
 **Files to modify:**
 
-- [ ] `src/types/generation.ts` (add `targetIDE` to context)
-- [ ] `src/cli/prompts.ts` (add IDE selection prompt)
-- [ ] `src/index.ts` (conditional auth and writer selection)
-- [ ] `src/writer/cursor-writer.ts` (new)
-- [ ] `src/utils/format-adapter.ts` (new)
-- [ ] `src/writer/index.ts` (rename to `claude-writer.ts` or add conditional)
+- [x] `src/types/generation.ts` (add `targetIDE` to context)
+- [x] `src/cli/prompts.ts` (add IDE selection prompt)
+- [x] `src/index.ts` (conditional auth and writer selection)
+- [x] `src/writer/cursor-writer.ts` (new)
+- [x] `src/utils/format-adapter.ts` (new)
+- [x] `src/writer/index.ts` (kept as-is, CursorWriter is separate)
 
 **Cursor Rule Format Notes:**
 
@@ -517,13 +522,13 @@ npm run test:coverage   # Coverage report
 
 ### Version 1.3 (Phase 3 + 4)
 
-- [ ] Prompt compression
-- [ ] Local templates
-- [ ] --update mode
-- [ ] Monorepo support
-- [ ] Custom templates
-- [ ] Export/import
-- [ ] Cursor IDE support (.cursor/rules/ output)
+- [x] Prompt compression
+- [x] Local templates
+- [x] --update mode
+- [x] Monorepo support
+- [x] Custom templates
+- [x] Export/import
+- [x] Cursor IDE support (.cursor/rules/ output)
 
 ### Version 1.4 (Phase 5)
 
@@ -565,14 +570,14 @@ npm run test:coverage   # Coverage report
 
 ### Phase 4 (Next Up)
 
-- [ ] Create updater/index.ts
-- [ ] Implement --update mode
-- [ ] Add monorepo detection
-- [ ] Implement custom templates
-- [ ] Implement export/import
-- [ ] Add IDE selection (Claude Code vs Cursor)
-- [ ] Create Cursor output writer (.cursor/rules/)
-- [ ] Create format adapter for Cursor rule syntax
+- [x] Create updater/index.ts
+- [x] Implement --update mode
+- [x] Add monorepo detection
+- [x] Implement custom templates
+- [x] Implement export/import
+- [x] Add IDE selection (Claude Code vs Cursor)
+- [x] Create Cursor output writer (.cursor/rules/)
+- [x] Create format adapter for Cursor rule syntax
 
 ### Phase 5
 

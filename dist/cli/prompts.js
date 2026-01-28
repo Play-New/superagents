@@ -62,6 +62,32 @@ export async function collectProjectGoal() {
         category: answers.category
     };
 }
+export async function selectIDE() {
+    const result = await p.group({
+        ide: () => p.select({
+            message: 'Which IDE are you using?',
+            options: [
+                {
+                    value: 'claude',
+                    label: 'Claude Code',
+                    hint: 'Official Anthropic CLI (recommended)'
+                },
+                {
+                    value: 'cursor',
+                    label: 'Cursor',
+                    hint: 'AI-powered code editor'
+                }
+            ],
+            initialValue: 'claude'
+        })
+    }, {
+        onCancel: () => {
+            p.cancel('Operation cancelled');
+            process.exit(0);
+        }
+    });
+    return result.ide;
+}
 export async function selectModel() {
     const result = await p.group({
         model: () => p.select({
@@ -128,15 +154,34 @@ export async function confirmSelections(recommendations) {
     }
     return { agents, skills };
 }
-export async function confirmOverwrite() {
+export async function confirmOverwrite(dirName = '.claude') {
     const shouldOverwrite = await p.confirm({
-        message: '.claude directory already exists. Overwrite?',
+        message: `${dirName} directory already exists. Overwrite?`,
         initialValue: false
     });
     if (p.isCancel(shouldOverwrite)) {
         return false;
     }
     return shouldOverwrite;
+}
+export async function selectPackages(packages) {
+    p.note(`Found ${packages.length} packages in this monorepo:\n` +
+        packages.map(p => `  ${pc.green('•')} ${p.name} (${p.relativePath})`).join('\n'), 'Monorepo Detected');
+    const selected = await p.multiselect({
+        message: `Select packages to configure ${pc.dim('(space to toggle, enter to confirm)')}`,
+        options: packages.map(pkg => ({
+            value: pkg.relativePath,
+            label: pkg.name,
+            hint: pkg.relativePath,
+            selected: true // Default to all selected
+        })),
+        required: true
+    });
+    if (p.isCancel(selected)) {
+        p.cancel('Operation cancelled');
+        process.exit(0);
+    }
+    return selected;
 }
 // Helper functions
 function categorizeGoal(description) {

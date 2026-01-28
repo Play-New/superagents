@@ -28,6 +28,20 @@ export interface MCPServer {
     path: string;
     capabilities: string[];
 }
+export type MonorepoTool = 'npm' | 'yarn' | 'pnpm' | 'lerna' | 'turborepo' | 'nx';
+export interface MonorepoPackage {
+    name: string;
+    path: string;
+    relativePath: string;
+    hasPackageJson: boolean;
+}
+export interface MonorepoInfo {
+    isMonorepo: boolean;
+    tool: MonorepoTool | null;
+    rootPackageJson: string | null;
+    packages: MonorepoPackage[];
+    workspaceGlobs: string[];
+}
 export interface ExistingClaudeConfig {
     hasClaudeDir: boolean;
     hasCLAUDEMd: boolean;
@@ -50,6 +64,7 @@ export interface CodebaseAnalysis {
     suggestedAgents: string[];
     existingClaudeConfig: ExistingClaudeConfig | null;
     mcpServers: MCPServer[];
+    monorepo: MonorepoInfo | null;
     sampledFiles: SampledFile[];
     analyzedAt: string;
     analysisTimeMs: number;

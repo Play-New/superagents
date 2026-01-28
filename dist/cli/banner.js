@@ -2,6 +2,9 @@
  * ASCII art banner and branding
  */
 import pc from "picocolors";
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const pkg = require('../../package.json');
 export const BANNER = `
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
@@ -25,7 +28,7 @@ export const BANNER = `
 `;
 export function displayBanner() {
     console.log(pc.cyan(BANNER));
-    console.log(pc.dim("  Version 1.2.1\n"));
+    console.log(pc.dim(`  Version ${pkg.version}\n`));
 }
 export function displaySuccess(summary) {
     console.log("\n" +

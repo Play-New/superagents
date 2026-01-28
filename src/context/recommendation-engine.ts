@@ -8,6 +8,62 @@ import type { Recommendations, AgentScore, SkillScore } from '../types/config.js
 import { GOAL_PRESETS } from '../config/presets.js';
 
 export class RecommendationEngine {
+  // Technology keywords to skill mappings
+  private static readonly TECH_KEYWORDS: Record<string, { skills: string[]; agents: string[] }> = {
+    // Python ecosystem
+    'fastapi': { skills: ['fastapi', 'python'], agents: ['backend-engineer', 'api-designer'] },
+    'django': { skills: ['python'], agents: ['backend-engineer'] },
+    'flask': { skills: ['python'], agents: ['backend-engineer'] },
+    'python': { skills: ['python'], agents: ['backend-engineer'] },
+
+    // JavaScript/TypeScript ecosystem
+    'react': { skills: ['react', 'typescript'], agents: ['frontend-specialist'] },
+    'nextjs': { skills: ['nextjs', 'react', 'typescript'], agents: ['frontend-specialist', 'backend-engineer'] },
+    'next.js': { skills: ['nextjs', 'react', 'typescript'], agents: ['frontend-specialist', 'backend-engineer'] },
+    'vue': { skills: ['vue', 'typescript'], agents: ['frontend-specialist'] },
+    'nuxt': { skills: ['vue', 'typescript'], agents: ['frontend-specialist'] },
+    'express': { skills: ['express', 'nodejs'], agents: ['backend-engineer'] },
+    'node': { skills: ['nodejs'], agents: ['backend-engineer'] },
+    'nodejs': { skills: ['nodejs'], agents: ['backend-engineer'] },
+    'typescript': { skills: ['typescript'], agents: [] },
+
+    // Databases
+    'postgresql': { skills: ['prisma', 'drizzle'], agents: ['database-specialist'] },
+    'postgres': { skills: ['prisma', 'drizzle'], agents: ['database-specialist'] },
+    'mysql': { skills: ['prisma', 'drizzle'], agents: ['database-specialist'] },
+    'mongodb': { skills: [], agents: ['database-specialist'] },
+    'supabase': { skills: ['supabase'], agents: ['database-specialist'] },
+    'redis': { skills: [], agents: ['database-specialist'] },
+
+    // ORMs
+    'prisma': { skills: ['prisma'], agents: ['database-specialist'] },
+    'drizzle': { skills: ['drizzle'], agents: ['database-specialist'] },
+
+    // Cloud & DevOps
+    'docker': { skills: ['docker'], agents: ['devops-specialist'] },
+    'kubernetes': { skills: ['docker'], agents: ['devops-specialist'] },
+    'aws': { skills: [], agents: ['devops-specialist'] },
+    'gcp': { skills: [], agents: ['devops-specialist'] },
+    'azure': { skills: [], agents: ['devops-specialist'] },
+
+    // Testing
+    'vitest': { skills: ['vitest'], agents: ['testing-specialist'] },
+    'jest': { skills: [], agents: ['testing-specialist'] },
+    'pytest': { skills: ['python'], agents: ['testing-specialist'] },
+
+    // Styling
+    'tailwind': { skills: ['tailwind'], agents: ['frontend-specialist'] },
+    'tailwindcss': { skills: ['tailwind'], agents: ['frontend-specialist'] },
+
+    // API
+    'graphql': { skills: ['graphql'], agents: ['api-designer'] },
+    'rest': { skills: [], agents: ['api-designer'] },
+    'api': { skills: [], agents: ['api-designer'] },
+
+    // MCP
+    'mcp': { skills: ['mcp'], agents: [] },
+  };
+
   recommend(goal: ProjectGoal, codebase: CodebaseAnalysis): Recommendations {
     const agentScores = new Map<string, AgentScore>();
     const skillScores = new Map<string, SkillScore>();
@@ -32,6 +88,47 @@ export class RecommendationEngine {
           score: suggestion.priority * 10,
           reasons: [suggestion.reason]
         });
+      }
+    }
+
+    // Parse goal description for technology keywords (HIGH PRIORITY)
+    const mentionedTechs = this.extractTechnologies(goal.description);
+    for (const tech of mentionedTechs) {
+      const mapping = RecommendationEngine.TECH_KEYWORDS[tech];
+      if (mapping) {
+        // Add skills mentioned in goal (high score - user explicitly mentioned)
+        for (const skillName of mapping.skills) {
+          const existing = skillScores.get(skillName);
+          if (existing) {
+            existing.score += 50; // High boost for explicitly mentioned tech
+            if (!existing.reasons.includes('Mentioned in your goal')) {
+              existing.reasons.unshift('Mentioned in your goal');
+            }
+          } else {
+            skillScores.set(skillName, {
+              name: skillName,
+              score: 80, // High base score for mentioned tech
+              reasons: ['Mentioned in your goal']
+            });
+          }
+        }
+
+        // Add related agents
+        for (const agentName of mapping.agents) {
+          const existing = agentScores.get(agentName);
+          if (existing) {
+            existing.score += 30;
+            if (!existing.reasons.includes('Relevant to your tech stack')) {
+              existing.reasons.unshift('Relevant to your tech stack');
+            }
+          } else {
+            agentScores.set(agentName, {
+              name: agentName,
+              score: 60,
+              reasons: ['Relevant to your tech stack']
+            });
+          }
+        }
       }
     }
 
@@ -86,5 +183,23 @@ export class RecommendationEngine {
       defaultAgents,
       defaultSkills
     };
+  }
+
+  /**
+   * Extract technology keywords from goal description
+   */
+  private extractTechnologies(description: string): string[] {
+    const lower = description.toLowerCase();
+    const found: string[] = [];
+
+    for (const tech of Object.keys(RecommendationEngine.TECH_KEYWORDS)) {
+      // Match whole word or tech followed by common delimiters
+      const pattern = new RegExp(`\\b${tech.replace('.', '\\.')}\\b`, 'i');
+      if (pattern.test(lower)) {
+        found.push(tech);
+      }
+    }
+
+    return found;
   }
 }

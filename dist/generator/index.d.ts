@@ -12,11 +12,13 @@ export declare class AIGenerator {
     constructor();
     generateAll(context: GenerationContext): Promise<GeneratedOutputs>;
     /**
-     * Generate an agent using Claude AI (with caching)
+     * Generate an agent using local template or Claude AI (with caching)
+     * Priority: 1. Cache, 2. Local template, 3. API
      */
     private generateAgent;
     /**
-     * Generate a skill using Claude AI (with caching)
+     * Generate a skill using local template or Claude AI (with caching)
+     * Priority: 1. Cache, 2. Local template, 3. API
      */
     private generateSkill;
     /**
@@ -24,15 +26,18 @@ export declare class AIGenerator {
      */
     private generateClaudeMdWithAI;
     /**
-     * Build comprehensive prompt for agent generation
+     * Build compressed prompt for agent generation
+     * Uses centralized templates for consistency and reduced token usage
      */
     private buildAgentPrompt;
     /**
-     * Build comprehensive prompt for skill generation
+     * Build compressed prompt for skill generation
+     * Uses centralized templates for consistency and reduced token usage
      */
     private buildSkillPrompt;
     /**
-     * Build prompt for CLAUDE.md generation
+     * Build compressed prompt for CLAUDE.md generation
+     * Uses centralized templates for consistency and reduced token usage
      */
     private buildClaudeMdPrompt;
     private generatePlaceholderAgent;
