@@ -18,7 +18,8 @@ import { promisify } from 'util';
 import os from 'os';
 import path from 'path';
 import { displayBanner, displayError, displaySuccess } from './cli/banner.js';
-import { collectProjectGoal, selectModel, confirmSelections, selectIDE } from './cli/prompts.js';
+import { collectProjectGoal, collectNewProjectSpec, detectProjectMode, specToGoal, selectModel, confirmSelections } from './cli/prompts.js';
+import type { ProjectMode } from './types/goal.js';
 import { displayDryRunPreview } from './cli/dry-run.js';
 import { authenticateWithAnthropic } from './utils/auth.js';
 import { setVerbose, log } from './utils/logger.js';
@@ -27,10 +28,9 @@ import { CodebaseAnalyzer } from './analyzer/codebase-analyzer.js';
 import { RecommendationEngine } from './context/recommendation-engine.js';
 import { AIGenerator } from './generator/index.js';
 import { OutputWriter } from './writer/index.js';
-import { CursorWriter } from './writer/cursor-writer.js';
 import { ConfigUpdater } from './updater/index.js';
 import type { ProjectGoal } from './types/goal.js';
-import type { GenerationContext, TargetIDE } from './types/generation.js';
+import type { GenerationContext } from './types/generation.js';
 import type { CodebaseAnalysis } from './types/codebase.js';
 
 const execAsync = promisify(exec);
@@ -108,7 +108,6 @@ async function handleUpdateMode(isVerbose: boolean): Promise<void> {
     selectedAgents: updates.agentsToAdd,
     selectedSkills: updates.skillsToAdd,
     selectedModel: 'sonnet',
-    targetIDE: 'claude',
     authMethod: auth.method,
     apiKey: auth.apiKey,
     sampledFiles: codebaseAnalysis.sampledFiles || [],
@@ -175,52 +174,49 @@ program
         return;
       }
 
-      // Step 1: Collect project goal
-      const goalData = await collectProjectGoal();
-      const goal: ProjectGoal = {
-        ...goalData,
-        technicalRequirements: [],
-        suggestedAgents: [],
-        suggestedSkills: [],
-        timestamp: new Date().toISOString(),
-        confidence: 1.0
-      };
+      // Step 1: Detect project mode (new vs existing)
+      const projectMode: ProjectMode = await detectProjectMode(process.cwd());
+      log.debug(`Project mode: ${projectMode}`);
+
+      // Step 2: Collect project goal based on mode
+      let goal: ProjectGoal;
+
+      if (projectMode === 'new') {
+        // New project: guided spec gathering
+        console.log(pc.dim('  Detected: New/minimal project\n'));
+        const spec = await collectNewProjectSpec();
+        const goalData = specToGoal(spec);
+        goal = {
+          ...goalData,
+          technicalRequirements: [],
+          suggestedAgents: [],
+          suggestedSkills: [],
+          timestamp: new Date().toISOString(),
+          confidence: 1.0
+        };
+      } else {
+        // Existing codebase: standard flow
+        console.log(pc.dim('  Detected: Existing codebase\n'));
+        const goalData = await collectProjectGoal();
+        goal = {
+          ...goalData,
+          technicalRequirements: [],
+          suggestedAgents: [],
+          suggestedSkills: [],
+          timestamp: new Date().toISOString(),
+          confidence: 1.0
+        };
+      }
 
       log.debug(`Goal: ${goal.description}`);
       log.debug(`Category: ${goal.category}`);
 
-      // Step 2: Select target IDE
-      const targetIDE: TargetIDE = await selectIDE();
-      log.debug(`Target IDE: ${targetIDE}`);
-
-      // Step 3: Authenticate with Anthropic (skip in dry-run, optional for Cursor)
+      // Step 2: Authenticate with Anthropic (skip in dry-run)
       let auth: { method: 'api-key' | 'claude-plan'; apiKey?: string } = { method: 'api-key', apiKey: undefined };
       if (!isDryRun) {
-        if (targetIDE === 'claude') {
-          // Claude Code requires authentication
-          p.note('', pc.bold('\n🔐 Authentication'));
-          auth = await authenticateWithAnthropic();
-          log.debug(`Auth method: ${auth.method}`);
-        } else {
-          // Cursor can use templates-only mode or optional API key
-          const useApi = await p.confirm({
-            message: 'Would you like to use AI generation? (API key required for custom content)',
-            initialValue: true
-          });
-
-          if (p.isCancel(useApi)) {
-            p.cancel('Operation cancelled');
-            process.exit(0);
-          }
-
-          if (useApi) {
-            p.note('', pc.bold('\n🔐 API Authentication'));
-            auth = await authenticateWithAnthropic();
-            log.debug(`Auth method: ${auth.method}`);
-          } else {
-            log.debug('Using templates-only mode (no API)');
-          }
-        }
+        p.note('', pc.bold('\n🔐 Authentication'));
+        auth = await authenticateWithAnthropic();
+        log.debug(`Auth method: ${auth.method}`);
       }
 
       // Step 3: Select AI model
@@ -283,7 +279,6 @@ program
         selectedAgents: selections.agents,
         selectedSkills: selections.skills,
         selectedModel: model,
-        targetIDE,
         authMethod: auth.method,
         apiKey: auth.apiKey,
         sampledFiles: codebaseAnalysis.sampledFiles || [],
@@ -308,12 +303,9 @@ program
       console.log('');  // Add spacing after generation
 
       // Step 8: Write output
-      const outputDir = targetIDE === 'cursor' ? '.cursor/rules' : '.claude';
-      spinner.start(`Writing files to ${outputDir} folder...`);
+      spinner.start('Writing files to .claude folder...');
 
-      const writer = targetIDE === 'cursor'
-        ? new CursorWriter(process.cwd())
-        : new OutputWriter(process.cwd());
+      const writer = new OutputWriter(process.cwd());
       const summary = await writer.writeAll(outputs);
 
       spinner.stop(pc.green('✓') + ' Files written successfully');

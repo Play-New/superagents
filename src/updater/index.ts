@@ -194,8 +194,8 @@ export class ConfigUpdater {
     const skillsDir = path.join(this.claudeDir, 'skills');
 
     // Generate new content if needed
-    let addedAgentNames: string[] = [];
-    let addedSkillNames: string[] = [];
+    const addedAgentNames: string[] = [];
+    const addedSkillNames: string[] = [];
 
     if (updates.agentsToAdd.length > 0 || updates.skillsToAdd.length > 0) {
       const generator = new AIGenerator();

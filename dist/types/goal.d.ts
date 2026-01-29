@@ -34,4 +34,14 @@ export interface GoalPreset {
     recommendedSkills: SkillSuggestion[];
     technicalRequirements: TechRequirement[];
 }
+export type ProjectMode = 'new' | 'existing';
+export type ProjectFocus = 'frontend' | 'backend' | 'fullstack' | 'api';
+export type TechStack = 'react-node' | 'nextjs' | 'python-fastapi' | 'vue-node' | 'other';
+export type ProjectRequirement = 'auth' | 'payments' | 'realtime' | 'database' | 'api';
+export interface ProjectSpec {
+    vision: string;
+    stack: TechStack;
+    focus: ProjectFocus;
+    requirements: ProjectRequirement[];
+}
 //# sourceMappingURL=goal.d.ts.map

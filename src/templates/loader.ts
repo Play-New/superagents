@@ -44,7 +44,12 @@ const BUNDLED_AGENTS = [
   'api-designer',
   'testing-specialist',
   'docs-writer',
-  'performance-optimizer'
+  'performance-optimizer',
+  // New expert-backed agents
+  'copywriter',
+  'designer',
+  'architect',
+  'product-manager'
 ];
 
 const BUNDLED_SKILLS = [

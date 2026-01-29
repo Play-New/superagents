@@ -4,14 +4,12 @@
 import type { ProjectGoal } from './goal.js';
 import type { CodebaseAnalysis, SampledFile } from './codebase.js';
 import type { AuthMethod } from '../utils/auth.js';
-export type TargetIDE = 'claude' | 'cursor';
 export interface GenerationContext {
     goal: ProjectGoal;
     codebase: CodebaseAnalysis;
     selectedAgents: string[];
     selectedSkills: string[];
     selectedModel: 'opus' | 'sonnet';
-    targetIDE: TargetIDE;
     authMethod: AuthMethod;
     apiKey?: string;
     sampledFiles: SampledFile[];

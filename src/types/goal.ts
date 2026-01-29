@@ -55,3 +55,33 @@ export interface GoalPreset {
   recommendedSkills: SkillSuggestion[];
   technicalRequirements: TechRequirement[];
 }
+
+// Project mode: 'new' for empty/minimal projects, 'existing' for codebases with code
+export type ProjectMode = 'new' | 'existing';
+
+// Focus area for new projects
+export type ProjectFocus = 'frontend' | 'backend' | 'fullstack' | 'api';
+
+// Tech stack options for new projects
+export type TechStack =
+  | 'react-node'
+  | 'nextjs'
+  | 'python-fastapi'
+  | 'vue-node'
+  | 'other';
+
+// Requirements that can be selected for new projects
+export type ProjectRequirement =
+  | 'auth'
+  | 'payments'
+  | 'realtime'
+  | 'database'
+  | 'api';
+
+// Spec for new projects (guided spec gathering)
+export interface ProjectSpec {
+  vision: string;
+  stack: TechStack;
+  focus: ProjectFocus;
+  requirements: ProjectRequirement[];
+}

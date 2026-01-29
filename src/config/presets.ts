@@ -7,18 +7,21 @@ import type { GoalCategory, GoalPreset } from '../types/goal.js';
 export const GOAL_PRESETS: Record<GoalCategory, GoalPreset> = {
   'saas-dashboard': {
     recommendedAgents: [
-      { name: 'frontend-engineer', priority: 10, reason: 'Dashboard UI development' },
+      { name: 'frontend-specialist', priority: 10, reason: 'Dashboard UI development' },
       { name: 'backend-engineer', priority: 9, reason: 'API and data layer' },
-      { name: 'api-engineer', priority: 8, reason: 'RESTful API design' },
-      { name: 'reviewer', priority: 7, reason: 'Code quality assurance' },
-      { name: 'debugger', priority: 6, reason: 'Troubleshooting' }
+      { name: 'api-designer', priority: 8, reason: 'RESTful API design' },
+      { name: 'designer', priority: 8, reason: 'UI/UX design and consistency' },
+      { name: 'code-reviewer', priority: 7, reason: 'Code quality assurance' },
+      { name: 'architect', priority: 7, reason: 'System architecture' },
+      { name: 'debugger', priority: 6, reason: 'Troubleshooting' },
+      { name: 'product-manager', priority: 6, reason: 'Requirements and prioritization' }
     ],
     recommendedSkills: [
       { name: 'react', priority: 10, reason: 'UI framework' },
       { name: 'nextjs', priority: 10, reason: 'Full-stack framework' },
       { name: 'typescript', priority: 9, reason: 'Type safety' },
       { name: 'tailwind', priority: 9, reason: 'Styling' },
-      { name: 'api-design', priority: 8, reason: 'REST API patterns' }
+      { name: 'prisma', priority: 8, reason: 'Database ORM' }
     ],
     technicalRequirements: [
       {
@@ -50,17 +53,21 @@ export const GOAL_PRESETS: Record<GoalCategory, GoalPreset> = {
 
   'ecommerce': {
     recommendedAgents: [
-      { name: 'frontend-engineer', priority: 10, reason: 'Product pages and checkout UI' },
+      { name: 'frontend-specialist', priority: 10, reason: 'Product pages and checkout UI' },
       { name: 'backend-engineer', priority: 10, reason: 'Order processing and inventory' },
-      { name: 'api-engineer', priority: 8, reason: 'Cart and checkout APIs' },
-      { name: 'reviewer', priority: 7, reason: 'Code quality' }
+      { name: 'api-designer', priority: 8, reason: 'Cart and checkout APIs' },
+      { name: 'copywriter', priority: 9, reason: 'Product descriptions and CTAs' },
+      { name: 'designer', priority: 9, reason: 'Shopping experience and visual design' },
+      { name: 'security-analyst', priority: 8, reason: 'Payment security' },
+      { name: 'code-reviewer', priority: 7, reason: 'Code quality' },
+      { name: 'performance-optimizer', priority: 7, reason: 'Page load optimization' }
     ],
     recommendedSkills: [
       { name: 'nextjs', priority: 10, reason: 'E-commerce framework' },
-      { name: 'stripe', priority: 10, reason: 'Payment processing' },
       { name: 'react', priority: 9, reason: 'UI components' },
       { name: 'typescript', priority: 9, reason: 'Type safety for transactions' },
-      { name: 'api-design', priority: 8, reason: 'Cart and checkout APIs' }
+      { name: 'prisma', priority: 8, reason: 'Database ORM' },
+      { name: 'tailwind', priority: 8, reason: 'Styling' }
     ],
     technicalRequirements: [
       {
@@ -86,16 +93,19 @@ export const GOAL_PRESETS: Record<GoalCategory, GoalPreset> = {
 
   'content-platform': {
     recommendedAgents: [
-      { name: 'frontend-engineer', priority: 10, reason: 'Content display and layouts' },
+      { name: 'frontend-specialist', priority: 10, reason: 'Content display and layouts' },
       { name: 'backend-engineer', priority: 8, reason: 'Content API and CMS' },
-      { name: 'docs-writer', priority: 8, reason: 'Documentation and content guidelines' },
-      { name: 'reviewer', priority: 6, reason: 'Code quality' }
+      { name: 'docs-writer', priority: 9, reason: 'Documentation and content guidelines' },
+      { name: 'copywriter', priority: 8, reason: 'Editorial guidelines and microcopy' },
+      { name: 'designer', priority: 8, reason: 'Reading experience and typography' },
+      { name: 'code-reviewer', priority: 6, reason: 'Code quality' },
+      { name: 'performance-optimizer', priority: 7, reason: 'Content delivery optimization' }
     ],
     recommendedSkills: [
       { name: 'nextjs', priority: 10, reason: 'SSG/SSR for content' },
       { name: 'react', priority: 9, reason: 'UI components' },
-      { name: 'markdown', priority: 8, reason: 'Content formatting' },
-      { name: 'cms', priority: 7, reason: 'Content management' }
+      { name: 'typescript', priority: 8, reason: 'Type safety' },
+      { name: 'tailwind', priority: 8, reason: 'Styling' }
     ],
     technicalRequirements: [
       {
@@ -116,15 +126,19 @@ export const GOAL_PRESETS: Record<GoalCategory, GoalPreset> = {
   'api-service': {
     recommendedAgents: [
       { name: 'backend-engineer', priority: 10, reason: 'API implementation' },
-      { name: 'api-engineer', priority: 10, reason: 'API design and documentation' },
-      { name: 'reviewer', priority: 7, reason: 'Code quality' },
-      { name: 'docs-writer', priority: 7, reason: 'API documentation' }
+      { name: 'api-designer', priority: 10, reason: 'API design and documentation' },
+      { name: 'architect', priority: 9, reason: 'System architecture' },
+      { name: 'database-specialist', priority: 8, reason: 'Data modeling' },
+      { name: 'security-analyst', priority: 8, reason: 'API security' },
+      { name: 'docs-writer', priority: 7, reason: 'API documentation' },
+      { name: 'testing-specialist', priority: 7, reason: 'API testing' },
+      { name: 'code-reviewer', priority: 6, reason: 'Code quality' }
     ],
     recommendedSkills: [
-      { name: 'api-design', priority: 10, reason: 'REST/GraphQL patterns' },
-      { name: 'nodejs', priority: 9, reason: 'Runtime' },
+      { name: 'nodejs', priority: 10, reason: 'Runtime' },
       { name: 'typescript', priority: 9, reason: 'Type safety' },
-      { name: 'openapi', priority: 8, reason: 'API documentation' }
+      { name: 'express', priority: 8, reason: 'API framework' },
+      { name: 'prisma', priority: 8, reason: 'Database ORM' }
     ],
     technicalRequirements: [
       {
@@ -144,14 +158,17 @@ export const GOAL_PRESETS: Record<GoalCategory, GoalPreset> = {
 
   'mobile-app': {
     recommendedAgents: [
-      { name: 'frontend-engineer', priority: 10, reason: 'Mobile UI development' },
+      { name: 'frontend-specialist', priority: 10, reason: 'Mobile UI development' },
       { name: 'backend-engineer', priority: 8, reason: 'API for mobile app' },
-      { name: 'reviewer', priority: 7, reason: 'Code quality' }
+      { name: 'designer', priority: 9, reason: 'Mobile UI/UX design' },
+      { name: 'api-designer', priority: 7, reason: 'Mobile API design' },
+      { name: 'code-reviewer', priority: 7, reason: 'Code quality' },
+      { name: 'testing-specialist', priority: 6, reason: 'Mobile testing' }
     ],
     recommendedSkills: [
-      { name: 'react-native', priority: 10, reason: 'Mobile framework' },
+      { name: 'react', priority: 10, reason: 'React Native base' },
       { name: 'typescript', priority: 9, reason: 'Type safety' },
-      { name: 'mobile-ui', priority: 8, reason: 'Mobile patterns' }
+      { name: 'nodejs', priority: 7, reason: 'Backend runtime' }
     ],
     technicalRequirements: [
       {
@@ -172,13 +189,14 @@ export const GOAL_PRESETS: Record<GoalCategory, GoalPreset> = {
   'cli-tool': {
     recommendedAgents: [
       { name: 'backend-engineer', priority: 10, reason: 'CLI implementation' },
-      { name: 'docs-writer', priority: 8, reason: 'CLI documentation' },
-      { name: 'reviewer', priority: 6, reason: 'Code quality' }
+      { name: 'docs-writer', priority: 9, reason: 'CLI documentation' },
+      { name: 'testing-specialist', priority: 8, reason: 'CLI testing' },
+      { name: 'copywriter', priority: 7, reason: 'Help text and error messages' },
+      { name: 'code-reviewer', priority: 6, reason: 'Code quality' }
     ],
     recommendedSkills: [
       { name: 'nodejs', priority: 10, reason: 'Runtime' },
-      { name: 'typescript', priority: 9, reason: 'Type safety' },
-      { name: 'cli-design', priority: 9, reason: 'CLI patterns' }
+      { name: 'typescript', priority: 9, reason: 'Type safety' }
     ],
     technicalRequirements: [
       {
@@ -192,14 +210,15 @@ export const GOAL_PRESETS: Record<GoalCategory, GoalPreset> = {
 
   'data-pipeline': {
     recommendedAgents: [
-      { name: 'data-engineer', priority: 10, reason: 'Data pipeline development' },
-      { name: 'backend-engineer', priority: 8, reason: 'Data processing logic' },
-      { name: 'reviewer', priority: 6, reason: 'Code quality' }
+      { name: 'backend-engineer', priority: 10, reason: 'Data processing logic' },
+      { name: 'database-specialist', priority: 10, reason: 'Data modeling and queries' },
+      { name: 'architect', priority: 9, reason: 'Pipeline architecture' },
+      { name: 'devops-specialist', priority: 8, reason: 'Pipeline deployment' },
+      { name: 'code-reviewer', priority: 6, reason: 'Code quality' }
     ],
     recommendedSkills: [
       { name: 'python', priority: 10, reason: 'Data processing language' },
-      { name: 'sql', priority: 9, reason: 'Data queries' },
-      { name: 'data-processing', priority: 9, reason: 'ETL patterns' }
+      { name: 'fastapi', priority: 8, reason: 'API framework' }
     ],
     technicalRequirements: [
       {
@@ -220,13 +239,16 @@ export const GOAL_PRESETS: Record<GoalCategory, GoalPreset> = {
   'auth-service': {
     recommendedAgents: [
       { name: 'backend-engineer', priority: 10, reason: 'Auth implementation' },
-      { name: 'security-engineer', priority: 9, reason: 'Security best practices' },
-      { name: 'reviewer', priority: 7, reason: 'Code quality' }
+      { name: 'security-analyst', priority: 10, reason: 'Security best practices' },
+      { name: 'api-designer', priority: 8, reason: 'Auth API design' },
+      { name: 'architect', priority: 8, reason: 'Auth architecture' },
+      { name: 'testing-specialist', priority: 7, reason: 'Security testing' },
+      { name: 'code-reviewer', priority: 7, reason: 'Code quality' }
     ],
     recommendedSkills: [
-      { name: 'auth', priority: 10, reason: 'Authentication patterns' },
-      { name: 'security', priority: 9, reason: 'Security best practices' },
-      { name: 'nodejs', priority: 8, reason: 'Runtime' }
+      { name: 'nodejs', priority: 10, reason: 'Runtime' },
+      { name: 'typescript', priority: 9, reason: 'Type safety' },
+      { name: 'prisma', priority: 8, reason: 'Database ORM' }
     ],
     technicalRequirements: [
       {
@@ -246,9 +268,11 @@ export const GOAL_PRESETS: Record<GoalCategory, GoalPreset> = {
 
   'custom': {
     recommendedAgents: [
-      { name: 'reviewer', priority: 8, reason: 'Code quality assurance' },
+      { name: 'code-reviewer', priority: 8, reason: 'Code quality assurance' },
       { name: 'debugger', priority: 7, reason: 'Troubleshooting' },
-      { name: 'docs-writer', priority: 6, reason: 'Documentation' }
+      { name: 'docs-writer', priority: 6, reason: 'Documentation' },
+      { name: 'architect', priority: 6, reason: 'System design' },
+      { name: 'product-manager', priority: 5, reason: 'Requirements definition' }
     ],
     recommendedSkills: [],
     technicalRequirements: []
