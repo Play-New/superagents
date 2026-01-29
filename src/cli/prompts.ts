@@ -10,6 +10,7 @@ import { glob } from 'glob';
 import type { GoalCategory, ProjectMode, ProjectSpec, TechStack, ProjectFocus, ProjectRequirement } from '../types/goal.js';
 import type { Recommendations } from '../types/config.js';
 import type { MonorepoPackage } from '../types/codebase.js';
+import { AGENT_EXPERTS } from './banner.js';
 
 export async function collectProjectGoal(): Promise<{ description: string; category: GoalCategory }> {
   p.intro(pc.bgCyan(pc.black(' SuperAgents ')));
@@ -108,23 +109,33 @@ export async function confirmSelections(recommendations: Recommendations): Promi
   agents: string[];
   skills: string[];
 }> {
-  // Show recommendations
+  // Show expert-backed agents recommendation
+  const agentLines = recommendations.agents
+    .slice(0, 5)
+    .map(a => {
+      const expert = AGENT_EXPERTS[a.name];
+      const expertText = expert ? pc.cyan(` [${expert.expert}]`) : '';
+      return `  ${pc.green('✓')} ${pc.bold(a.name)}${expertText}\n     ${pc.dim(a.reasons[0])}`;
+    })
+    .join('\n');
+
   p.note(
-    recommendations.agents
-      .slice(0, 5)
-      .map(a => `  ${pc.green('✓')} ${a.name} (score: ${a.score}) - ${a.reasons[0]}`)
-      .join('\n'),
-    'Recommended Agents'
+    agentLines,
+    'Expert-Backed Agents'
   );
 
   const agents = await p.multiselect({
-    message: `Select agents to include ${pc.dim('(space to toggle, enter to confirm)')}`,
-    options: recommendations.agents.map(agent => ({
-      value: agent.name,
-      label: agent.name,
-      hint: `${agent.reasons[0]} (score: ${agent.score})`,
-      selected: recommendations.defaultAgents.includes(agent.name)
-    })),
+    message: `Select agents ${pc.dim('(built on industry-leading principles)')}`,
+    options: recommendations.agents.map(agent => {
+      const expert = AGENT_EXPERTS[agent.name];
+      const expertHint = expert ? `${expert.expert}'s ${expert.domain}` : agent.reasons[0];
+      return {
+        value: agent.name,
+        label: agent.name,
+        hint: expertHint,
+        selected: recommendations.defaultAgents.includes(agent.name)
+      };
+    }),
     required: true
   }) as string[];
 
@@ -133,20 +144,21 @@ export async function confirmSelections(recommendations: Recommendations): Promi
     process.exit(0);
   }
 
+  // Show skills recommendation
   p.note(
     recommendations.skills
       .slice(0, 5)
-      .map(s => `  ${pc.green('✓')} ${s.name} (score: ${s.score}) - ${s.reasons[0]}`)
+      .map(s => `  ${pc.green('✓')} ${pc.bold(s.name)} - ${pc.dim(s.reasons[0])}`)
       .join('\n'),
-    'Recommended Skills'
+    'Framework Skills'
   );
 
   const skills = await p.multiselect({
-    message: `Select skills to include ${pc.dim('(space to toggle, enter to confirm)')}`,
+    message: `Select skills ${pc.dim('(framework-specific best practices)')}`,
     options: recommendations.skills.map(skill => ({
       value: skill.name,
       label: skill.name,
-      hint: `${skill.reasons[0]} (score: ${skill.score})`,
+      hint: skill.reasons[0],
       selected: recommendations.defaultSkills.includes(skill.name)
     })),
     required: true
