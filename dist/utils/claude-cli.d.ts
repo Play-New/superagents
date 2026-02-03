@@ -14,7 +14,7 @@ export declare function checkClaudeCLI(): Promise<boolean>;
  *
  * @param prompt The prompt to send to Claude
  * @param model The model to use ('opus' or 'sonnet')
- * @returns Claude's response text
+ * @returns Claude's response text (cleaned of internal thinking/tool syntax)
  */
-export declare function executeWithClaudeCLI(prompt: string, model?: 'opus' | 'sonnet'): Promise<string>;
+export declare function executeWithClaudeCLI(prompt: string, model?: "opus" | "sonnet"): Promise<string>;
 //# sourceMappingURL=claude-cli.d.ts.map

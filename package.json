@@ -28,12 +28,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rinaldofesta/superagents.git"
+    "url": "git+https://github.com/Play-New/superagents.git"
   },
   "bugs": {
-    "url": "https://github.com/rinaldofesta/superagents/issues"
+    "url": "https://github.com/Play-New/superagents/issues"
   },
-  "homepage": "https://github.com/rinaldofesta/superagents#readme",
+  "homepage": "https://superagents.playnew.com",
   "keywords": [
     "claude",
     "anthropic",

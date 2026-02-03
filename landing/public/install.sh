@@ -84,7 +84,7 @@ install_superagents() {
     if command -v git &> /dev/null; then
         # Use git if available
         rm -rf "$INSTALL_DIR"
-        git clone --depth 1 https://github.com/rinaldofesta/superagents.git "$INSTALL_DIR" 2>/dev/null || {
+        git clone --depth 1 https://github.com/Play-New/superagents.git "$INSTALL_DIR" 2>/dev/null || {
             echo -e "${YELLOW}Git clone failed, trying npm install...${NC}"
             npm install -g superagents 2>/dev/null || {
                 echo -e "${RED}Installation failed. Please try: npm install -g superagents${NC}"
@@ -167,7 +167,7 @@ print_success() {
     echo -e "  4. Get AI-generated agents and skills!"
     echo ""
     echo -e "  ${YELLOW}Need help?${NC}"
-    echo -e "  GitHub: https://github.com/rinaldofesta/superagents"
+    echo -e "  GitHub: https://github.com/Play-New/superagents"
     echo ""
 }
 

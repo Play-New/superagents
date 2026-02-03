@@ -30,7 +30,7 @@ Node.js 20+
 npm install -g superagents
 
 # Or one-line install
-curl -fsSL https://raw.githubusercontent.com/rinaldofesta/superagents/main/install.sh | bash
+curl -fsSL https://superagents.playnew.com/install.sh | bash
 
 # Development
 npm install        # Install dependencies
@@ -215,8 +215,8 @@ typescript, nodejs, react, nextjs, vue, tailwind, prisma, drizzle, express, supa
 
 ## Additional Resources
 
-- Repository: https://github.com/rinaldofesta/superagents
-- Issues: https://github.com/rinaldofesta/superagents/issues
+- Repository: https://github.com/Play-New/superagents
+- Issues: https://github.com/Play-New/superagents/issues
 - Custom templates: `~/.superagents/templates/`
 
 ## Coding Principles

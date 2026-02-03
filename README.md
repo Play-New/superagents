@@ -51,7 +51,7 @@ All agents include **Karpathy's 4 Coding Principles** for systematic, high-quali
 ### One-Line Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rinaldofesta/superagents/main/install.sh | bash
+curl -fsSL https://superagents.playnew.com/install.sh | bash
 ```
 
 **Requirements:** Node.js 20+

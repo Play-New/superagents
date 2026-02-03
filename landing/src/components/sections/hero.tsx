@@ -82,7 +82,7 @@ export function Hero() {
           </div>
 
           <a
-            href="https://github.com/rinaldofesta/superagents"
+            href="https://github.com/Play-New/superagents"
             target="_blank"
             rel="noopener noreferrer"
             className={buttonVariants({ variant: "outline", size: "lg" })}>

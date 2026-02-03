@@ -35,15 +35,15 @@ async function handleUpdateMode(isVerbose) {
     const updater = new ConfigUpdater(process.cwd());
     // Check if .claude/ exists
     if (!(await updater.hasExistingConfig())) {
-        console.log(pc.red('\n  No existing .claude/ configuration found.'));
-        console.log(pc.dim('  Run superagents without --update to create a new configuration.\n'));
+        console.log(pc.red('\n  No .claude/ folder found in this project.'));
+        console.log(pc.dim('  Run superagents first to create a configuration.\n'));
         process.exit(1);
     }
     // Read existing configuration
     const spinner = p.spinner();
-    spinner.start('Reading existing configuration...');
+    spinner.start('Reading current config...');
     const existing = await updater.readExisting();
-    spinner.stop(pc.green('✓') + ' Configuration loaded');
+    spinner.stop(pc.green('✓') + ' Config loaded');
     // Get available agents and skills from templates
     const { getAvailableTemplates } = await import('./templates/loader.js');
     const available = getAvailableTemplates();
@@ -56,21 +56,21 @@ async function handleUpdateMode(isVerbose) {
         updates.skillsToRemove.length > 0 ||
         updates.regenerateClaudeMd;
     if (!hasChanges) {
-        console.log(pc.yellow('\n  No changes selected.\n'));
+        console.log(pc.yellow('\n  Nothing to update. Use space to select items.\n'));
         return;
     }
     // Authenticate if adding new content
     let auth = { method: 'api-key', apiKey: undefined };
     if (updates.agentsToAdd.length > 0 || updates.skillsToAdd.length > 0 || updates.regenerateClaudeMd) {
-        p.note('', pc.bold('\n🔐 Authentication required for generation'));
+        p.note('', pc.bold('\n🔐 Sign in to generate new content'));
         auth = await authenticateWithAnthropic();
         log.debug(`Auth method: ${auth.method}`);
     }
     // Build minimal context for generation
-    spinner.start('Analyzing codebase...');
+    spinner.start('Scanning your codebase...');
     const analyzer = new CodebaseAnalyzer(process.cwd());
     const codebaseAnalysis = await analyzer.analyze();
-    spinner.stop(pc.green('✓') + ' Codebase analyzed');
+    spinner.stop(pc.green('✓') + ' Codebase scanned');
     const context = {
         goal: {
             description: 'Update existing configuration',
@@ -93,35 +93,35 @@ async function handleUpdateMode(isVerbose) {
         generatedAt: new Date().toISOString()
     };
     // Apply updates
-    spinner.start('Applying updates...');
+    spinner.start('Applying changes...');
     const result = await updater.applyUpdates(context, updates);
-    spinner.stop(pc.green('✓') + ' Updates applied');
+    spinner.stop(pc.green('✓') + ' Changes applied');
     // Display summary
-    console.log('\n' + pc.bold(pc.green('  Update Complete!\n')));
+    console.log('\n' + pc.bold(pc.green('  Config updated!\n')));
     if (result.added.agents.length > 0) {
-        console.log(pc.dim('  Added agents: ') + result.added.agents.join(', '));
+        console.log(pc.green('  + ') + 'Agents: ' + result.added.agents.join(', '));
     }
     if (result.added.skills.length > 0) {
-        console.log(pc.dim('  Added skills: ') + result.added.skills.join(', '));
+        console.log(pc.green('  + ') + 'Skills: ' + result.added.skills.join(', '));
     }
     if (result.removed.agents.length > 0) {
-        console.log(pc.dim('  Removed agents: ') + result.removed.agents.join(', '));
+        console.log(pc.red('  - ') + 'Agents: ' + result.removed.agents.join(', '));
     }
     if (result.removed.skills.length > 0) {
-        console.log(pc.dim('  Removed skills: ') + result.removed.skills.join(', '));
+        console.log(pc.red('  - ') + 'Skills: ' + result.removed.skills.join(', '));
     }
     if (result.regenerated) {
-        console.log(pc.dim('  Regenerated: ') + 'CLAUDE.md');
+        console.log(pc.blue('  ~ ') + 'Regenerated CLAUDE.md');
     }
     console.log('');
 }
 program
     .name('superagents')
-    .description('Context-aware Claude Code configuration generator')
+    .description('Generate expert-backed Claude Code configurations for your project')
     .version('1.3.1')
-    .option('--dry-run', 'Preview what would be generated without making API calls')
-    .option('-v, --verbose', 'Show detailed output')
-    .option('-u, --update', 'Update existing .claude/ configuration incrementally')
+    .option('--dry-run', 'Preview generation without API calls or file changes')
+    .option('-v, --verbose', 'Show detailed logs')
+    .option('-u, --update', 'Add or remove agents from existing config')
     .action(async (options) => {
     try {
         // Set verbose mode
@@ -135,7 +135,7 @@ program
         // Display banner
         displayBanner();
         if (isDryRun) {
-            console.log(pc.yellow('\n  Running in DRY-RUN mode - no API calls will be made\n'));
+            console.log(pc.yellow('\n  Preview mode: no files will be created\n'));
         }
         // Handle update mode
         if (options.update) {
@@ -179,7 +179,7 @@ program
         // Step 2: Authenticate with Anthropic (skip in dry-run)
         let auth = { method: 'api-key', apiKey: undefined };
         if (!isDryRun) {
-            p.note('', pc.bold('\n🔐 Authentication'));
+            p.note('', pc.bold('\n🔐 Sign in'));
             auth = await authenticateWithAnthropic();
             log.debug(`Auth method: ${auth.method}`);
         }
@@ -190,19 +190,19 @@ program
         await cache.init();
         // Step 4: Analyze codebase (with caching)
         const spinner = p.spinner();
-        spinner.start('Analyzing your codebase...');
+        spinner.start('Scanning your project...');
         let codebaseAnalysis;
         const cachedAnalysis = await cache.getCachedAnalysis(process.cwd());
         if (cachedAnalysis) {
             codebaseAnalysis = cachedAnalysis;
-            spinner.stop(pc.green('✓') + ' Codebase analyzed ' + pc.dim('(cached)'));
+            spinner.stop(pc.green('✓') + ' Project scanned ' + pc.dim('(cached)'));
             log.verbose('Using cached codebase analysis');
         }
         else {
             const analyzer = new CodebaseAnalyzer(process.cwd());
             codebaseAnalysis = await analyzer.analyze();
             await cache.setCachedAnalysis(process.cwd(), codebaseAnalysis);
-            spinner.stop(pc.green('✓') + ' Codebase analyzed');
+            spinner.stop(pc.green('✓') + ' Project scanned');
             log.verbose('Codebase analysis cached for future runs');
         }
         log.section('Codebase Analysis');
@@ -214,10 +214,10 @@ program
             'Dependencies': codebaseAnalysis.dependencies.length
         });
         // Step 5: Generate recommendations
-        spinner.start('Generating recommendations...');
+        spinner.start('Finding the best agents for your project...');
         const recommendationEngine = new RecommendationEngine();
         const recommendations = await recommendationEngine.recommend(goal, codebaseAnalysis);
-        spinner.stop(pc.green('✓') + ' Recommendations generated');
+        spinner.stop(pc.green('✓') + ' Found ' + recommendations.defaultAgents.length + ' recommended agents');
         log.section('Recommendations');
         log.verbose(`Agents: ${recommendations.agents.map(a => `${a.name}(${a.score})`).join(', ')}`);
         log.verbose(`Skills: ${recommendations.skills.map(s => `${s.name}(${s.score})`).join(', ')}`);
@@ -251,10 +251,10 @@ program
         const outputs = await generator.generateAll(context);
         console.log(''); // Add spacing after generation
         // Step 8: Write output
-        spinner.start('Writing files to .claude folder...');
+        spinner.start('Saving configuration...');
         const writer = new OutputWriter(process.cwd());
         const summary = await writer.writeAll(outputs);
-        spinner.stop(pc.green('✓') + ' Files written successfully');
+        spinner.stop(pc.green('✓') + ' Configuration saved');
         // Display success message
         displaySuccess(summary);
     }
@@ -272,22 +272,22 @@ program
 // Update command
 program
     .command('update')
-    .description('Update SuperAgents to the latest version')
+    .description('Get the latest version of SuperAgents')
     .action(async () => {
     const installDir = path.join(os.homedir(), '.superagents');
-    console.log(pc.blue('\n  Updating SuperAgents...\n'));
+    console.log(pc.blue('\n  Checking for updates...\n'));
     try {
         // Check if installed via git
         const { stdout: gitCheck } = await execAsync(`cd "${installDir}" && git rev-parse --is-inside-work-tree 2>/dev/null`).catch(() => ({ stdout: '' }));
         if (gitCheck.trim() === 'true') {
             // Git-based installation - reset build artifacts and pull latest
-            console.log(pc.dim('  Resetting local changes...'));
+            console.log(pc.dim('  Preparing update...'));
             await execAsync(`cd "${installDir}" && git checkout -- dist/ package-lock.json 2>/dev/null || true`);
             await execAsync(`cd "${installDir}" && git clean -fd dist/ 2>/dev/null || true`);
-            console.log(pc.dim('  Pulling latest changes...'));
+            console.log(pc.dim('  Downloading latest version...'));
             const { stdout: pullOutput } = await execAsync(`cd "${installDir}" && git pull`);
             if (pullOutput.includes('Already up to date')) {
-                console.log(pc.green('  ✓ SuperAgents is already up to date!\n'));
+                console.log(pc.green('  ✓ You have the latest version!\n'));
             }
             else {
                 // Rebuild after update
@@ -295,65 +295,65 @@ program
                 await execAsync(`cd "${installDir}" && npm install`);
                 console.log(pc.dim('  Building...'));
                 await execAsync(`cd "${installDir}" && npm run build`);
-                console.log(pc.green('\n  ✓ SuperAgents updated successfully!\n'));
+                console.log(pc.green('\n  ✓ Updated to latest version!\n'));
             }
         }
         else {
             // npm-based installation
-            console.log(pc.yellow('  Updating via npm...\n'));
+            console.log(pc.dim('  Updating via npm...\n'));
             await execAsync('npm update -g superagents');
-            console.log(pc.green('  ✓ SuperAgents updated successfully!\n'));
+            console.log(pc.green('  ✓ Updated to latest version!\n'));
         }
     }
     catch (error) {
         console.log(pc.red('  ✗ Update failed\n'));
-        console.log(pc.dim(`  Error: ${error instanceof Error ? error.message : 'Unknown error'}\n`));
-        console.log(pc.dim('  Try manually: cd ~/.superagents && git reset --hard && git pull && npm install && npm run build\n'));
+        console.log(pc.dim(`  ${error instanceof Error ? error.message : 'Unknown error'}\n`));
+        console.log(pc.dim('  Manual fix: cd ~/.superagents && git reset --hard && git pull && npm install && npm run build\n'));
         process.exit(1);
     }
 });
 // Cache command
 program
     .command('cache')
-    .description('Manage SuperAgents cache')
-    .option('--clear', 'Clear all cached data')
-    .option('--stats', 'Show cache statistics')
+    .description('View or clear cached data')
+    .option('--clear', 'Delete all cached data')
+    .option('--stats', 'Show cache size and entries')
     .action(async (options) => {
     try {
         await cache.init();
         if (options.clear) {
             await cache.clearCache();
-            console.log(pc.green('\n  ✓ Cache cleared successfully\n'));
+            console.log(pc.green('\n  ✓ Cache cleared\n'));
             return;
         }
         if (options.stats) {
             const stats = await cache.getStats();
-            console.log(pc.bold('\n  Cache Statistics\n'));
+            console.log(pc.bold('\n  Cache Info\n'));
             console.log(pc.dim(`  Location: ${cache.getCacheDir()}`));
-            console.log(pc.dim(`  Analysis entries: ${stats.analysisCount}`));
-            console.log(pc.dim(`  Generation entries: ${stats.generationCount}`));
-            console.log(pc.dim(`  Total size: ${formatBytes(stats.totalSize)}\n`));
+            console.log(pc.dim(`  Saved analyses: ${stats.analysisCount}`));
+            console.log(pc.dim(`  Saved generations: ${stats.generationCount}`));
+            console.log(pc.dim(`  Disk usage: ${formatBytes(stats.totalSize)}\n`));
             return;
         }
         // Show help if no option provided
         console.log(pc.bold('\n  Cache Commands\n'));
-        console.log(pc.dim('  superagents cache --stats   Show cache statistics'));
-        console.log(pc.dim('  superagents cache --clear   Clear all cached data\n'));
+        console.log(pc.dim('  superagents cache --stats   View cache size'));
+        console.log(pc.dim('  superagents cache --clear   Delete cached data\n'));
     }
     catch (error) {
         console.log(pc.red('\n  ✗ Cache operation failed\n'));
-        console.log(pc.dim(`  Error: ${error instanceof Error ? error.message : 'Unknown error'}\n`));
+        console.log(pc.dim(`  ${error instanceof Error ? error.message : 'Unknown error'}\n`));
         process.exit(1);
     }
 });
 // Templates command
 program
     .command('templates')
-    .description('Manage custom templates')
-    .option('--list', 'List all available templates')
-    .option('--export <name>', 'Export a built-in template to custom templates')
-    .option('--import <path>', 'Import a template file')
-    .option('--delete <name>', 'Delete a custom template')
+    .description('Create and manage custom agent templates')
+    .option('--list', 'Show all available templates')
+    .option('--export <name>', 'Copy a built-in template to customize')
+    .option('--import <path>', 'Add a template from file')
+    .option('--delete <name>', 'Remove a custom template')
     .option('--type <type>', 'Template type: agent or skill', 'agent')
     .action(async (options) => {
     const { listCustomTemplates, exportTemplate, importTemplate, deleteCustomTemplate, getCustomTemplatesDir, initCustomTemplatesDir } = await import('./templates/custom.js');
@@ -365,13 +365,13 @@ program
         if (options.list) {
             const builtin = getAvailableTemplates();
             const custom = await listCustomTemplates();
-            console.log(pc.bold('\n  Built-in Templates\n'));
+            console.log(pc.bold('\n  Built-in (') + builtin.agents.length + ' agents, ' + builtin.skills.length + ' skills)\n');
             console.log(pc.dim('  Agents: ') + builtin.agents.join(', '));
             console.log(pc.dim('  Skills: ') + builtin.skills.join(', '));
-            console.log(pc.bold('\n  Custom Templates\n'));
-            console.log(pc.dim('  Location: ') + getCustomTemplatesDir());
-            console.log(pc.dim('  Agents: ') + (custom.agents.length > 0 ? custom.agents.join(', ') : pc.dim('none')));
-            console.log(pc.dim('  Skills: ') + (custom.skills.length > 0 ? custom.skills.join(', ') : pc.dim('none')));
+            console.log(pc.bold('\n  Your Custom Templates\n'));
+            console.log(pc.dim('  Folder: ') + getCustomTemplatesDir());
+            console.log(pc.dim('  Agents: ') + (custom.agents.length > 0 ? custom.agents.join(', ') : 'none yet'));
+            console.log(pc.dim('  Skills: ') + (custom.skills.length > 0 ? custom.skills.join(', ') : 'none yet'));
             console.log('');
             return;
         }
@@ -381,11 +381,12 @@ program
             const builtInDir = path.join(__dirname, 'templates');
             const success = await exportTemplate(templateType, options.export, builtInDir);
             if (success) {
-                console.log(pc.green(`\n  ✓ Exported ${templateType} "${options.export}" to custom templates\n`));
-                console.log(pc.dim(`  Location: ${getCustomTemplatesDir()}/${templateType}s/${options.export.toLowerCase()}.md\n`));
+                console.log(pc.green(`\n  ✓ Copied "${options.export}" to your templates\n`));
+                console.log(pc.dim(`  Edit it at: ${getCustomTemplatesDir()}/${templateType}s/${options.export.toLowerCase()}.md\n`));
             }
             else {
-                console.log(pc.red(`\n  ✗ Built-in ${templateType} "${options.export}" not found\n`));
+                console.log(pc.red(`\n  ✗ No ${templateType} named "${options.export}" exists\n`));
+                console.log(pc.dim('  Run superagents templates --list to see available templates\n'));
             }
             return;
         }
@@ -393,96 +394,95 @@ program
             const success = await importTemplate(templateType, options.import);
             if (success) {
                 const name = path.basename(options.import, '.md');
-                console.log(pc.green(`\n  ✓ Imported ${templateType} "${name}" to custom templates\n`));
+                console.log(pc.green(`\n  ✓ Added "${name}" to your templates\n`));
             }
             else {
-                console.log(pc.red(`\n  ✗ File not found: ${options.import}\n`));
+                console.log(pc.red(`\n  ✗ Could not find file: ${options.import}\n`));
             }
             return;
         }
         if (options.delete) {
             const success = await deleteCustomTemplate(templateType, options.delete);
             if (success) {
-                console.log(pc.green(`\n  ✓ Deleted custom ${templateType} "${options.delete}"\n`));
+                console.log(pc.green(`\n  ✓ Removed "${options.delete}" from your templates\n`));
             }
             else {
-                console.log(pc.red(`\n  ✗ Custom ${templateType} "${options.delete}" not found\n`));
+                console.log(pc.red(`\n  ✗ No custom ${templateType} named "${options.delete}" found\n`));
             }
             return;
         }
         // Show help if no option provided
-        console.log(pc.bold('\n  Templates Commands\n'));
-        console.log(pc.dim('  superagents templates --list                    List all templates'));
-        console.log(pc.dim('  superagents templates --export <name>           Export built-in template for customization'));
-        console.log(pc.dim('  superagents templates --import <path>           Import a template file'));
-        console.log(pc.dim('  superagents templates --delete <name>           Delete a custom template'));
-        console.log(pc.dim('  superagents templates --type skill --export x   Specify template type (agent/skill)\n'));
+        console.log(pc.bold('\n  Template Commands\n'));
+        console.log(pc.dim('  superagents templates --list              Show all templates'));
+        console.log(pc.dim('  superagents templates --export <name>     Copy built-in to customize'));
+        console.log(pc.dim('  superagents templates --import <path>     Add template from file'));
+        console.log(pc.dim('  superagents templates --delete <name>     Remove custom template'));
+        console.log(pc.dim('  superagents templates --type skill ...    Work with skill templates\n'));
     }
     catch (error) {
-        console.log(pc.red('\n  ✗ Templates operation failed\n'));
-        console.log(pc.dim(`  Error: ${error instanceof Error ? error.message : 'Unknown error'}\n`));
+        console.log(pc.red('\n  ✗ Template operation failed\n'));
+        console.log(pc.dim(`  ${error instanceof Error ? error.message : 'Unknown error'}\n`));
         process.exit(1);
     }
 });
 // Export command
 program
     .command('export [output]')
-    .description('Export .claude/ configuration to a zip file')
+    .description('Save your config as a shareable zip file')
     .action(async (output) => {
     const { exportConfig } = await import('./config/export-import.js');
     try {
         const outputPath = output || `superagents-config-${Date.now()}.zip`;
         const absolutePath = path.isAbsolute(outputPath) ? outputPath : path.join(process.cwd(), outputPath);
-        console.log(pc.blue('\n  Exporting configuration...\n'));
+        console.log(pc.blue('\n  Creating export...\n'));
         const result = await exportConfig(process.cwd(), absolutePath);
-        console.log(pc.green('  ✓ Configuration exported successfully!\n'));
-        console.log(pc.dim(`  File: ${result.path}`));
-        console.log(pc.dim(`  Agents: ${result.metadata.agents.join(', ') || 'none'}`));
-        console.log(pc.dim(`  Skills: ${result.metadata.skills.join(', ') || 'none'}`));
-        console.log(pc.dim(`  Includes CLAUDE.md: ${result.metadata.hasCLAUDEmd ? 'yes' : 'no'}\n`));
+        console.log(pc.green('  ✓ Config exported!\n'));
+        console.log(pc.dim(`  Saved to: ${result.path}`));
+        console.log(pc.dim(`  Contains: ${result.metadata.agents.length} agents, ${result.metadata.skills.length} skills`));
+        console.log(pc.dim(`  CLAUDE.md: ${result.metadata.hasCLAUDEmd ? 'included' : 'not included'}\n`));
     }
     catch (error) {
         console.log(pc.red('\n  ✗ Export failed\n'));
-        console.log(pc.dim(`  Error: ${error instanceof Error ? error.message : 'Unknown error'}\n`));
+        console.log(pc.dim(`  ${error instanceof Error ? error.message : 'Unknown error'}\n`));
         process.exit(1);
     }
 });
 // Import command
 program
     .command('import <source>')
-    .description('Import configuration from a zip file')
-    .option('-f, --force', 'Overwrite existing configuration')
-    .option('--preview', 'Preview contents without importing')
+    .description('Load config from a zip file')
+    .option('-f, --force', 'Replace existing config')
+    .option('--preview', 'Show contents without importing')
     .action(async (source, options) => {
     const { importConfig, previewConfig } = await import('./config/export-import.js');
     try {
         const sourcePath = path.isAbsolute(source) ? source : path.join(process.cwd(), source);
         if (options.preview) {
-            console.log(pc.blue('\n  Previewing configuration...\n'));
+            console.log(pc.blue('\n  Contents of this export:\n'));
             const metadata = await previewConfig(sourcePath);
             if (metadata) {
                 console.log(pc.dim(`  Version: ${metadata.version}`));
-                console.log(pc.dim(`  Exported: ${metadata.exportedAt}`));
-                console.log(pc.dim(`  From project: ${metadata.projectRoot}`));
+                console.log(pc.dim(`  Created: ${metadata.exportedAt}`));
+                console.log(pc.dim(`  Source: ${metadata.projectRoot}`));
                 console.log(pc.dim(`  Agents: ${metadata.agents.join(', ') || 'none'}`));
                 console.log(pc.dim(`  Skills: ${metadata.skills.join(', ') || 'none'}`));
-                console.log(pc.dim(`  Includes CLAUDE.md: ${metadata.hasCLAUDEmd ? 'yes' : 'no'}\n`));
+                console.log(pc.dim(`  CLAUDE.md: ${metadata.hasCLAUDEmd ? 'included' : 'not included'}\n`));
             }
             else {
-                console.log(pc.yellow('  No metadata found in archive\n'));
+                console.log(pc.yellow('  This archive has no metadata\n'));
             }
             return;
         }
-        console.log(pc.blue('\n  Importing configuration...\n'));
+        console.log(pc.blue('\n  Importing config...\n'));
         const result = await importConfig(sourcePath, process.cwd(), options.force);
-        console.log(pc.green('  ✓ Configuration imported successfully!\n'));
-        console.log(pc.dim(`  Files written: ${result.filesWritten}`));
+        console.log(pc.green('  ✓ Config imported!\n'));
+        console.log(pc.dim(`  Files created: ${result.filesWritten}`));
         console.log(pc.dim(`  Agents: ${result.metadata.agents.join(', ') || 'none'}`));
         console.log(pc.dim(`  Skills: ${result.metadata.skills.join(', ') || 'none'}\n`));
     }
     catch (error) {
         console.log(pc.red('\n  ✗ Import failed\n'));
-        console.log(pc.dim(`  Error: ${error instanceof Error ? error.message : 'Unknown error'}\n`));
+        console.log(pc.dim(`  ${error instanceof Error ? error.message : 'Unknown error'}\n`));
         process.exit(1);
     }
 });

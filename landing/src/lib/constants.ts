@@ -177,7 +177,7 @@ export const STEPS = [
 ] as const;
 
 export const LINKS = {
-  github: "https://github.com/rinaldofesta/superagents",
-  issues: "https://github.com/rinaldofesta/superagents/issues",
+  github: "https://github.com/Play-New/superagents",
+  issues: "https://github.com/Play-New/superagents/issues",
   playnew: "https://playnew.com",
 } as const;

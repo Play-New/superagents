@@ -177,7 +177,7 @@ export function AgentsShowcase() {
               +{AGENTS.length - displayAgents.length} more agents available
             </p>
             <a
-              href="https://github.com/rinaldofesta/superagents"
+              href="https://github.com/Play-New/superagents"
               target="_blank"
               rel="noopener noreferrer"
               className={cn(
