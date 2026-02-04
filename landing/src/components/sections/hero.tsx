@@ -18,8 +18,8 @@ export function Hero() {
   };
 
   return (
-    <ShaderBackground className="min-h-screen flex items-center justify-center px-4 py-20 w-full max-w-full">
-      <div className="max-w-3xl w-full mx-auto text-center">
+    <ShaderBackground className="min-h-screen flex items-center justify-center px-4 py-20 w-full max-w-[100vw] overflow-hidden">
+      <div className="max-w-3xl w-full mx-auto text-center px-2 sm:px-0 box-border">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -61,13 +61,13 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
           className="flex flex-col items-center justify-center gap-4">
-          <div className="relative group w-full max-w-2xl mx-auto">
+          <div className="relative group w-full max-w-[calc(100vw-2rem)] sm:max-w-2xl mx-auto">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-secondary rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-500" />
             <button
               onClick={handleCopy}
-              className="relative flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 sm:py-4 bg-card border border-border rounded-lg hover:bg-card/80 transition-colors w-full"
+              className="relative flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 sm:py-4 bg-card border border-border rounded-lg hover:bg-card/80 transition-colors w-full overflow-hidden"
             >
-              <code className="font-mono text-xs sm:text-sm md:text-base text-foreground truncate flex-1 text-left">
+              <code className="font-mono text-[10px] sm:text-sm md:text-base text-foreground truncate flex-1 text-left overflow-hidden">
                 {command}
               </code>
               {copied ? (

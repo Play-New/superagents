@@ -50,19 +50,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className="overflow-x-hidden">
-      <body className="overflow-x-hidden">
+    <html lang="en" suppressHydrationWarning className="overflow-x-hidden max-w-[100vw]">
+      <body className="overflow-x-hidden max-w-[100vw]">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
           enableSystem={false}
           disableTransitionOnChange
         >
-          {/* Floating glow blobs */}
-          <div className="glow-blob glow-blob-1" />
-          <div className="glow-blob glow-blob-2" />
-          <div className="glow-blob glow-blob-3" />
-          {children}
+          {/* Floating glow blobs - inside overflow-hidden container to prevent scroll */}
+          <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+            <div className="glow-blob glow-blob-1" />
+            <div className="glow-blob glow-blob-2" />
+            <div className="glow-blob glow-blob-3" />
+          </div>
+          <div className="relative z-10 w-full max-w-[100vw] overflow-x-hidden">
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>
