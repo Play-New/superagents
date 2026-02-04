@@ -8,11 +8,11 @@ set -e
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
+ORANGE='\033[38;2;255;77;0m'  # PlayNew brand orange
 NC='\033[0m' # No Color
 
 # Print banner
-echo -e "${BLUE}"
+echo -e "${ORANGE}"
 echo "╔═══════════════════════════════════════════════════════════════╗"
 echo "║                                                               ║"
 echo "║   ███████╗██╗   ██╗██████╗ ███████╗██████╗                    ║"
@@ -29,27 +29,28 @@ echo "║  ██╔══██║██║   ██║██╔══╝  █�
 echo "║  ██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   ███████║         ║"
 echo "║  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝         ║"
 echo "║                                                               ║"
-echo "║  Goal-Aware Claude Code Configuration Generator               ║"
+echo "║           Your AI team, configured in seconds                 ║"
+echo "║     Powered by Play New's community of expert specialists     ║"
 echo "║                                                               ║"
 echo "╚═══════════════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 
 echo ""
-echo -e "${BLUE}Installing SuperAgents...${NC}"
+echo -e "${ORANGE}Installing SuperAgents...${NC}"
 echo ""
 
 # Check for Node.js
 check_node() {
     if ! command -v node &> /dev/null; then
         echo -e "${RED}Error: Node.js is not installed.${NC}"
-        echo -e "Please install Node.js 20+ from: ${BLUE}https://nodejs.org${NC}"
+        echo -e "Please install Node.js 20+ from: ${ORANGE}https://nodejs.org${NC}"
         exit 1
     fi
 
     NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
     if [ "$NODE_VERSION" -lt 20 ]; then
         echo -e "${RED}Error: Node.js 20+ is required. You have $(node -v)${NC}"
-        echo -e "Please upgrade Node.js from: ${BLUE}https://nodejs.org${NC}"
+        echo -e "Please upgrade Node.js from: ${ORANGE}https://nodejs.org${NC}"
         exit 1
     fi
     echo -e "${GREEN}✓${NC} Node.js $(node -v) detected"
@@ -78,7 +79,7 @@ create_dirs() {
 # Download and install
 install_superagents() {
     echo ""
-    echo -e "${BLUE}Downloading SuperAgents...${NC}"
+    echo -e "${ORANGE}Downloading SuperAgents...${NC}"
 
     # Clone or download
     if command -v git &> /dev/null; then
@@ -103,14 +104,14 @@ install_superagents() {
 
     # Install dependencies
     echo ""
-    echo -e "${BLUE}Installing dependencies...${NC}"
+    echo -e "${ORANGE}Installing dependencies...${NC}"
     cd "$INSTALL_DIR"
     npm install --production
     echo -e "${GREEN}✓${NC} Dependencies installed"
 
     # Create symlink (dist/ is pre-built in the repo)
     echo ""
-    echo -e "${BLUE}Creating command link...${NC}"
+    echo -e "${ORANGE}Creating command link...${NC}"
     ln -sf "$INSTALL_DIR/bin/superagents" "$BIN_DIR/superagents"
     chmod +x "$INSTALL_DIR/bin/superagents"
     echo -e "${GREEN}✓${NC} Created 'superagents' command"
@@ -158,11 +159,11 @@ print_success() {
     echo -e "${GREEN}  SuperAgents installed successfully!${NC}"
     echo -e "${GREEN}════════════════════════════════════════════════════════════════${NC}"
     echo ""
-    echo -e "  Run ${BLUE}superagents${NC} in any project directory to get started."
+    echo -e "  Run ${ORANGE}superagents${NC} in any project directory to get started."
     echo ""
     echo -e "  ${YELLOW}Quick Start:${NC}"
     echo -e "  1. cd into your project"
-    echo -e "  2. Run: ${BLUE}superagents${NC}"
+    echo -e "  2. Run: ${ORANGE}superagents${NC}"
     echo -e "  3. Describe what you're building"
     echo -e "  4. Get AI-generated agents and skills!"
     echo ""
