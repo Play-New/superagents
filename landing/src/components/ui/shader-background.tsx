@@ -171,9 +171,9 @@ const ShaderBackground = ({ className, children }: ShaderBackgroundProps) => {
   );
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative overflow-hidden", className)}>
       <div className="absolute inset-0 w-full h-full" style={{ backgroundColor: '#0a0a0a' }}>
-        <Canvas dpr={[0.5, 1]} frameloop="demand">
+        <Canvas dpr={[0.5, 0.75]} frameloop="demand" style={{ width: '100%', height: '100%' }}>
           <ShaderPlane
             vertexShader={vertexShader}
             fragmentShader={fragmentShader}

@@ -17,6 +17,11 @@ export const metadata: Metadata = {
     "Node.js",
   ],
   authors: [{ name: "Play New" }],
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+  },
   openGraph: {
     title: "SuperAgents by Play New - AI Agents That Think Like Experts",
     description:
@@ -44,8 +49,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
+    <html lang="en" suppressHydrationWarning className="overflow-x-hidden">
+      <body className="overflow-x-hidden">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
