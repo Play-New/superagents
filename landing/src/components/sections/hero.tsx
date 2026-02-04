@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Copy, Check } from "lucide-react";
 import Image from "next/image";
 import { ShaderBackground } from "@/components/ui/shader-background";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 export function Hero() {
   const [copied, setCopied] = useState(false);
@@ -63,22 +63,19 @@ export function Hero() {
           className="flex flex-col items-center justify-center gap-4 w-full">
           <div className="relative group w-full max-w-2xl">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-secondary rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-500" />
-            <div className="relative flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 bg-card border border-border rounded-lg overflow-hidden">
-              <code className="font-mono text-xs sm:text-sm md:text-base text-foreground truncate flex-1">
+            <button
+              onClick={handleCopy}
+              className="relative flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 sm:py-4 bg-card border border-border rounded-lg hover:bg-card/80 transition-colors w-full"
+            >
+              <code className="font-mono text-xs sm:text-sm md:text-base text-foreground truncate flex-1 text-left">
                 {command}
               </code>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleCopy}
-                className="h-8 w-8 shrink-0">
-                {copied ? (
-                  <Check className="h-4 w-4 text-green-500" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
+              {copied ? (
+                <Check className="h-5 w-5 text-green-500 shrink-0" />
+              ) : (
+                <Copy className="h-5 w-5 text-muted-foreground shrink-0" />
+              )}
+            </button>
           </div>
 
           <a
