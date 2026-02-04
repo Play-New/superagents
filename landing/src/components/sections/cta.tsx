@@ -33,20 +33,20 @@ export function CTA() {
             One command. Expert-level AI agents. Your codebase, transformed.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <div className="relative group">
+          <div className="flex flex-col items-center justify-center gap-4 w-full">
+            <div className="relative group w-full max-w-2xl">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-secondary rounded-lg blur opacity-30 group-hover:opacity-60 transition duration-500" />
               <button
                 onClick={handleCopy}
-                className="relative flex items-center gap-3 px-6 py-4 bg-card border border-border rounded-lg hover:bg-card/80 transition-colors"
+                className="relative flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 sm:py-4 bg-card border border-border rounded-lg hover:bg-card/80 transition-colors w-full"
               >
-                <code className="font-mono text-lg text-foreground">
+                <code className="font-mono text-xs sm:text-sm md:text-base text-foreground truncate flex-1 text-left">
                   {command}
                 </code>
                 {copied ? (
-                  <Check className="h-5 w-5 text-green-500" />
+                  <Check className="h-5 w-5 text-green-500 shrink-0" />
                 ) : (
-                  <Copy className="h-5 w-5 text-muted-foreground" />
+                  <Copy className="h-5 w-5 text-muted-foreground shrink-0" />
                 )}
               </button>
             </div>

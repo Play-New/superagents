@@ -240,7 +240,7 @@ export function HowItWorks() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
-          className="grid lg:grid-cols-[350px_1fr] gap-0 rounded-xl overflow-hidden border border-border"
+          className="grid lg:grid-cols-[350px_1fr] gap-0 rounded-xl overflow-hidden border border-border max-w-full"
         >
           {/* Terminal + File Tree */}
           <div className="bg-neutral-900 border-b lg:border-b-0 lg:border-r border-border">
@@ -256,13 +256,13 @@ export function HowItWorks() {
                   Terminal
                 </span>
               </div>
-              <div className="p-3 font-mono text-xs space-y-0.5 max-h-[280px] overflow-y-auto">
+              <div className="p-3 font-mono text-xs space-y-0.5 max-h-[280px] overflow-y-auto overflow-x-hidden">
                 {terminalLines.map((line, i) => (
-                  <div key={i} className="flex items-start gap-2">
+                  <div key={i} className="flex items-start gap-2 min-w-0">
                     {line.type === "input" && (
                       <>
-                        <span className="text-green-500">$</span>
-                        <span className="text-foreground">{line.content}</span>
+                        <span className="text-green-500 shrink-0">$</span>
+                        <span className="text-foreground truncate">{line.content}</span>
                       </>
                     )}
                     {line.type === "output" && (
@@ -298,20 +298,20 @@ export function HowItWorks() {
           </div>
 
           {/* Code Preview */}
-          <div className="bg-card min-h-[480px]">
-            <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/30">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-foreground">
+          <div className="bg-card min-h-[300px] sm:min-h-[400px] lg:min-h-[480px]">
+            <div className="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-border bg-muted/30">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-xs sm:text-sm text-foreground truncate">
                   {selectedFile?.name || "Select a file"}
                 </span>
               </div>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground hidden sm:block">
                 .claude/{selectedFile?.name?.includes(".md") ? "agents/" : ""}
                 {selectedFile?.name}
               </span>
             </div>
-            <div className="p-4 overflow-auto max-h-[440px]">
-              <pre className="text-sm font-mono whitespace-pre-wrap">
+            <div className="p-3 sm:p-4 overflow-auto max-h-[250px] sm:max-h-[350px] lg:max-h-[440px]">
+              <pre className="text-xs sm:text-sm font-mono whitespace-pre-wrap">
                 <code className="text-muted-foreground">
                   {selectedFile?.content || "// Select a file to view"}
                 </code>

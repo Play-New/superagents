@@ -60,18 +60,18 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <div className="relative group">
+          className="flex flex-col items-center justify-center gap-4 w-full">
+          <div className="relative group w-full max-w-2xl">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-secondary rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-500" />
-            <div className="relative flex items-center gap-3 px-6 py-3 bg-card border border-border rounded-lg">
-              <code className="font-mono text-lg text-foreground">
+            <div className="relative flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 bg-card border border-border rounded-lg overflow-hidden">
+              <code className="font-mono text-xs sm:text-sm md:text-base text-foreground truncate flex-1">
                 {command}
               </code>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleCopy}
-                className="h-8 w-8">
+                className="h-8 w-8 shrink-0">
                 {copied ? (
                   <Check className="h-4 w-4 text-green-500" />
                 ) : (
