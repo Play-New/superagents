@@ -27,8 +27,8 @@ export const BANNER = `
 ║  ██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   ███████║         ║
 ║  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝         ║
 ║                                                               ║
-║  Generate Claude Code configs that write expert-level code    ║
-║  Built on Uncle Bob, Kent Beck, Dan Abramov & more            ║
+║  Generate context-aware Claude Code configs for your projects ║
+║  Powered by Play New's community of SMEs and SuperAgents      ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
 `;
