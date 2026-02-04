@@ -31,6 +31,36 @@ Well-written tests explain how the code should be used. They're living documenta
 ## Project Context
 
 Implementing tests for a {{category}} project using {{framework}} with {{language}}.
+{{#if requirements}}
+**Requirements:** {{requirements}}
+{{/if}}
+
+{{#if categoryGuidance}}
+{{categoryGuidance}}
+{{/if}}
+
+{{#if securityLevel !== 'standard'}}
+## Security Testing Priority
+
+This project has **{{securityLevel}}** security requirements:
+- Test authentication edge cases thoroughly
+- Verify authorization checks in all endpoints
+- Test input validation with malicious payloads
+- Verify sensitive data is not leaked in errors
+- Test rate limiting and account lockout
+{{/if}}
+
+## Your Project's Code Patterns
+
+{{codeExamples}}
+
+## Detected Patterns
+
+{{patterns}}
+
+{{#if patternRules}}
+{{patternRules}}
+{{/if}}
 
 ## When to Use This Agent
 

@@ -31,6 +31,25 @@ Security isn't something you add at the end. It's baked into design, development
 ## Project Context
 
 Securing a {{category}} project using {{framework}} with {{language}}.
+{{#if requirements}}
+**Requirements:** {{requirements}}
+{{/if}}
+
+{{#if categoryGuidance}}
+{{categoryGuidance}}
+{{/if}}
+
+## Your Project's Code Patterns
+
+{{codeExamples}}
+
+## Detected Patterns
+
+{{patterns}}
+
+{{#if patternRules}}
+{{patternRules}}
+{{/if}}
 
 ## When to Use This Agent
 

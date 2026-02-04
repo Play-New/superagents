@@ -47,6 +47,28 @@ Building a {{category}} project using {{framework}} with {{language}}.
 - Framework: {{framework}}
 - Language: {{language}}
 - Dependencies: {{dependencies}}
+{{#if requirements}}
+- Requirements: {{requirements}}
+{{/if}}
+
+{{#if categoryGuidance}}
+{{categoryGuidance}}
+{{/if}}
+
+{{#if securityLevel !== 'standard'}}
+## Security Requirements
+
+This project has **{{securityLevel}}** security requirements. Extra care is needed:
+- Review all input validation thoroughly
+- Never log sensitive data (passwords, tokens, PII)
+- Use parameterized queries to prevent SQL injection
+- Implement proper authentication and authorization checks
+- Consider security implications of every API endpoint
+{{/if}}
+
+## Your Project's Code Patterns
+
+{{codeExamples}}
 
 ## Responsibilities
 
@@ -56,9 +78,13 @@ Building a {{category}} project using {{framework}} with {{language}}.
 - Handle authentication and authorization
 - Optimize performance and queries
 
-## Patterns
+## Detected Patterns
 
 {{patterns}}
+
+{{#if patternRules}}
+{{patternRules}}
+{{/if}}
 
 ## Code Organization
 

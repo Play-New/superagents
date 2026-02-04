@@ -2,8 +2,8 @@
  * Tiered model selection for cost optimization
  *
  * Uses cheaper/faster models for simpler tasks:
- * - Haiku: Simple skills, hooks
- * - Sonnet: Agents, complex skills
+ * - Haiku: Simple skills, hooks, simple agents
+ * - Sonnet: Complex agents, complex skills
  * - Opus: CLAUDE.md (only if user selected Opus)
  */
 export type ModelTier = 'haiku' | 'sonnet' | 'opus';
@@ -31,17 +31,22 @@ interface ModelSelectionOptions {
     userSelectedModel: 'sonnet' | 'opus';
     generationType: GenerationType;
     complexity?: 'simple' | 'medium' | 'complex';
+    itemName?: string;
 }
 /**
  * Select the appropriate model based on task type and complexity
  *
  * Tiering strategy:
- * - Haiku: Simple tasks (hooks, basic skills) - 80% cost reduction vs Sonnet
- * - Sonnet: Complex tasks (agents, advanced skills) - baseline
+ * - Haiku: Simple tasks (hooks, basic skills, simple agents) - 80% cost reduction vs Sonnet
+ * - Sonnet: Complex tasks (complex agents, advanced skills) - baseline
  * - Opus: Only when user explicitly selects it for CLAUDE.md
  * Never exceed user's selected tier to respect budget constraints.
  */
 export declare function selectModel(options: ModelSelectionOptions): string;
+/**
+ * Get agent complexity for a specific agent name
+ */
+export declare function getAgentComplexity(agentName: string): 'simple' | 'medium' | 'complex';
 /**
  * Get the tier name from a model ID
  */

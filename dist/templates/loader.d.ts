@@ -4,6 +4,8 @@
  * Design:
  * - Use local templates for common agents/skills to reduce API calls
  * - Template variables: {{projectName}}, {{framework}}, {{goal}}, etc.
+ * - Conditional sections: {{#if category === 'cli-tool'}}...{{/if}}
+ * - Pattern-aware rules: {{#if patterns.includes('Repository')}}...{{/if}}
  * - Fallback to API generation if no template exists
  */
 import type { GenerationContext } from '../types/generation.js';

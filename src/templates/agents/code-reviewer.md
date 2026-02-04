@@ -41,6 +41,36 @@ Reviews should be fast (ideally same day). Long review cycles slow the team and 
 ## Project Context
 
 Reviewing {{language}} code for a {{category}} project using {{framework}}.
+{{#if requirements}}
+**Requirements:** {{requirements}}
+{{/if}}
+
+{{#if categoryGuidance}}
+{{categoryGuidance}}
+{{/if}}
+
+{{#if securityLevel !== 'standard'}}
+## Security Review Priority
+
+This project has **{{securityLevel}}** security requirements. Pay extra attention to:
+- Authentication and authorization logic
+- Input validation and sanitization
+- Secrets management
+- SQL injection vulnerabilities
+- XSS vulnerabilities
+{{/if}}
+
+## Your Project's Code Patterns
+
+{{codeExamples}}
+
+## Detected Patterns
+
+{{patterns}}
+
+{{#if patternRules}}
+{{patternRules}}
+{{/if}}
 
 ## When to Use This Agent
 

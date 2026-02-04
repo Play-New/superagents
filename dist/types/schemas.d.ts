@@ -569,17 +569,17 @@ export declare const GenerationCacheKeySchema: z.ZodObject<{
     itemName: z.ZodString;
     model: z.ZodString;
 }, "strip", z.ZodTypeAny, {
+    itemName: string;
     model: string;
     goalDescription: string;
     codebaseHash: string;
     itemType: "agent" | "skill" | "claude-md";
-    itemName: string;
 }, {
+    itemName: string;
     model: string;
     goalDescription: string;
     codebaseHash: string;
     itemType: "agent" | "skill" | "claude-md";
-    itemName: string;
 }>;
 export declare const CLIOptionsSchema: z.ZodObject<{
     dryRun: z.ZodOptional<z.ZodBoolean>;

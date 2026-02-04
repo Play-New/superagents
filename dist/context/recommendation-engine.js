@@ -2,6 +2,34 @@
  * Recommendation engine - combines goal and codebase analysis
  */
 import { GOAL_PRESETS } from '../config/presets.js';
+// Requirement to agent/skill boosting
+const REQUIREMENT_AGENTS = {
+    'auth': {
+        agents: ['security-analyst', 'backend-engineer'],
+        skills: ['nodejs', 'typescript'],
+        reason: 'Authentication requires security focus'
+    },
+    'payments': {
+        agents: ['security-analyst', 'backend-engineer', 'api-designer'],
+        skills: ['typescript', 'nodejs'],
+        reason: 'Payment processing requires security and API design'
+    },
+    'database': {
+        agents: ['database-specialist', 'backend-engineer'],
+        skills: ['prisma', 'drizzle'],
+        reason: 'Data storage requires database expertise'
+    },
+    'realtime': {
+        agents: ['backend-engineer', 'frontend-specialist'],
+        skills: ['nodejs', 'react'],
+        reason: 'Real-time features span frontend and backend'
+    },
+    'api': {
+        agents: ['api-designer', 'backend-engineer', 'docs-writer'],
+        skills: ['typescript', 'nodejs'],
+        reason: 'API integrations require design and documentation'
+    }
+};
 export class RecommendationEngine {
     // Technology keywords to skill mappings
     static TECH_KEYWORDS = {
@@ -110,6 +138,48 @@ export class RecommendationEngine {
                             score: 60,
                             reasons: ['Relevant to your tech stack']
                         });
+                    }
+                }
+            }
+        }
+        // Boost scores based on user-selected requirements (NEW PROJECT FLOW)
+        if (goal.requirements && goal.requirements.length > 0) {
+            for (const requirement of goal.requirements) {
+                const mapping = REQUIREMENT_AGENTS[requirement];
+                if (mapping) {
+                    // Boost agents for this requirement
+                    for (const agentName of mapping.agents) {
+                        const existing = agentScores.get(agentName);
+                        if (existing) {
+                            existing.score += 40; // High boost for explicitly selected requirement
+                            if (!existing.reasons.includes(mapping.reason)) {
+                                existing.reasons.unshift(mapping.reason);
+                            }
+                        }
+                        else {
+                            agentScores.set(agentName, {
+                                name: agentName,
+                                score: 70, // High base score for requirement-based agent
+                                reasons: [mapping.reason]
+                            });
+                        }
+                    }
+                    // Boost skills for this requirement
+                    for (const skillName of mapping.skills) {
+                        const existing = skillScores.get(skillName);
+                        if (existing) {
+                            existing.score += 30;
+                            if (!existing.reasons.includes(mapping.reason)) {
+                                existing.reasons.push(mapping.reason);
+                            }
+                        }
+                        else {
+                            skillScores.set(skillName, {
+                                name: skillName,
+                                score: 60,
+                                reasons: [mapping.reason]
+                            });
+                        }
                     }
                 }
             }

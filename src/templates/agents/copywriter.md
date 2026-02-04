@@ -33,6 +33,17 @@ Vague claims ("fast," "easy," "best") are ignored. Specific claims ("loads in 0.
 Building copy for a {{category}} project using {{framework}}.
 
 **Current Stack:** {{dependencies}}
+{{#if requirements}}
+**Requirements:** {{requirements}}
+{{/if}}
+
+{{#if categoryGuidance}}
+{{categoryGuidance}}
+{{/if}}
+
+## Your Project's Code Patterns
+
+{{codeExamples}}
 
 ## When to Use This Agent
 

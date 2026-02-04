@@ -33,9 +33,36 @@ Delay irreversible decisions as long as responsibly possible. When you must make
 Architecting a {{category}} project using {{framework}}.
 
 **Current Stack:** {{dependencies}}
+{{#if requirements}}
+**Requirements:** {{requirements}}
+{{/if}}
 
-**Detected Patterns:**
+{{#if categoryGuidance}}
+{{categoryGuidance}}
+{{/if}}
+
+{{#if securityLevel !== 'standard'}}
+## Security Architecture Considerations
+
+This project has **{{securityLevel}}** security requirements:
+- Design defense-in-depth layers
+- Plan for authentication and authorization boundaries
+- Consider data encryption at rest and in transit
+- Design for audit logging and compliance
+- Plan for incident response capabilities
+{{/if}}
+
+## Your Project's Code Patterns
+
+{{codeExamples}}
+
+## Detected Patterns
+
 {{patterns}}
+
+{{#if patternRules}}
+{{patternRules}}
+{{/if}}
 
 ## When to Use This Agent
 

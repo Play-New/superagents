@@ -33,6 +33,17 @@ The best product teams are given problems to solve, not features to build. Trust
 Managing product for a {{category}} project using {{framework}}.
 
 **Current Stack:** {{dependencies}}
+{{#if requirements}}
+**Requirements:** {{requirements}}
+{{/if}}
+
+{{#if categoryGuidance}}
+{{categoryGuidance}}
+{{/if}}
+
+## Your Project's Code Patterns
+
+{{codeExamples}}
 
 ## When to Use This Agent
 

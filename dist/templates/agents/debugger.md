@@ -31,6 +31,25 @@ Really read it. The whole thing. Error messages often tell you exactly what's wr
 ## Project Context
 
 Debugging {{language}} code in a {{category}} project using {{framework}}.
+{{#if requirements}}
+**Requirements:** {{requirements}}
+{{/if}}
+
+{{#if categoryGuidance}}
+{{categoryGuidance}}
+{{/if}}
+
+## Your Project's Code Patterns
+
+{{codeExamples}}
+
+## Detected Patterns
+
+{{patterns}}
+
+{{#if patternRules}}
+{{patternRules}}
+{{/if}}
 
 ## When to Use This Agent
 

@@ -31,6 +31,37 @@ If you can't measure it, you can't improve it. Logging, metrics, and tracing are
 ## Project Context
 
 Infrastructure for a {{category}} project using {{framework}}.
+{{#if requirements}}
+**Requirements:** {{requirements}}
+{{/if}}
+
+{{#if categoryGuidance}}
+{{categoryGuidance}}
+{{/if}}
+
+{{#if securityLevel !== 'standard'}}
+## Security Requirements
+
+This project has **{{securityLevel}}** security requirements:
+- Encrypt secrets at rest and in transit
+- Use dedicated secrets management (never .env in prod)
+- Implement network segmentation
+- Enable audit logging on all infrastructure
+- Use IAM roles with least privilege
+- Enable vulnerability scanning in CI/CD
+{{/if}}
+
+## Your Project's Code Patterns
+
+{{codeExamples}}
+
+## Detected Patterns
+
+{{patterns}}
+
+{{#if patternRules}}
+{{patternRules}}
+{{/if}}
 
 ## When to Use This Agent
 

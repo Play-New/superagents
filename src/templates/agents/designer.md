@@ -33,6 +33,17 @@ The typical "happy path" is easy. Great design handles errors, empty states, loa
 Designing for a {{category}} project using {{framework}}.
 
 **Current Stack:** {{dependencies}}
+{{#if requirements}}
+**Requirements:** {{requirements}}
+{{/if}}
+
+{{#if categoryGuidance}}
+{{categoryGuidance}}
+{{/if}}
+
+## Your Project's Code Patterns
+
+{{codeExamples}}
 
 ## When to Use This Agent
 

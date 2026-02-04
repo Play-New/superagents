@@ -24,12 +24,15 @@ export interface SkillSuggestion {
 export interface ProjectGoal {
     description: string;
     category: GoalCategory;
+    requirements?: ProjectRequirement[];
     technicalRequirements: TechRequirement[];
     suggestedAgents: AgentSuggestion[];
     suggestedSkills: SkillSuggestion[];
     timestamp: string;
     confidence: number;
 }
+export type SecurityLevel = 'standard' | 'elevated' | 'high';
+export declare const CATEGORY_SECURITY: Record<GoalCategory, SecurityLevel>;
 export interface GoalPreset {
     recommendedAgents: AgentSuggestion[];
     recommendedSkills: SkillSuggestion[];

@@ -332,8 +332,9 @@ export async function collectNewProjectSpec(): Promise<ProjectSpec> {
 
 /**
  * Convert ProjectSpec to ProjectGoal for existing codebase flow compatibility
+ * Now preserves requirements for use in recommendations and templates
  */
-export function specToGoal(spec: ProjectSpec): { description: string; category: GoalCategory } {
+export function specToGoal(spec: ProjectSpec): { description: string; category: GoalCategory; requirements: ProjectRequirement[] } {
   // Map stack to a suitable category
   const categoryMap: Record<TechStack, GoalCategory> = {
     'nextjs': 'saas-dashboard',
@@ -359,7 +360,8 @@ export function specToGoal(spec: ProjectSpec): { description: string; category: 
 
   return {
     description,
-    category: categoryMap[spec.stack]
+    category: categoryMap[spec.stack],
+    requirements: spec.requirements  // Preserve requirements
   };
 }
 

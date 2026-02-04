@@ -279,6 +279,7 @@ export async function collectNewProjectSpec() {
 }
 /**
  * Convert ProjectSpec to ProjectGoal for existing codebase flow compatibility
+ * Now preserves requirements for use in recommendations and templates
  */
 export function specToGoal(spec) {
     // Map stack to a suitable category
@@ -302,7 +303,8 @@ export function specToGoal(spec) {
     const description = `${spec.vision} (${focusText}${requirementsText})`;
     return {
         description,
-        category: categoryMap[spec.stack]
+        category: categoryMap[spec.stack],
+        requirements: spec.requirements // Preserve requirements
     };
 }
 // Helper functions

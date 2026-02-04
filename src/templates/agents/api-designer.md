@@ -31,6 +31,36 @@ APIs have users (developers). Understand their needs, iterate based on feedback,
 ## Project Context
 
 Designing APIs for a {{category}} project using {{framework}} with {{language}}.
+{{#if requirements}}
+**Requirements:** {{requirements}}
+{{/if}}
+
+{{#if categoryGuidance}}
+{{categoryGuidance}}
+{{/if}}
+
+{{#if securityLevel !== 'standard'}}
+## Security Requirements
+
+This project has **{{securityLevel}}** security requirements:
+- All endpoints must validate authentication
+- Implement rate limiting on all endpoints
+- Log all access to sensitive endpoints
+- Use proper authorization checks before data access
+- Never expose internal IDs in error messages
+{{/if}}
+
+## Your Project's Code Patterns
+
+{{codeExamples}}
+
+## Detected Patterns
+
+{{patterns}}
+
+{{#if patternRules}}
+{{patternRules}}
+{{/if}}
 
 ## When to Use This Agent
 

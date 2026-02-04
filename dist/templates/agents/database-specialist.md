@@ -33,6 +33,36 @@ Every index speeds up reads but slows down writes. Index what you query, remove 
 Designing and optimizing databases for a {{category}} project using {{framework}}.
 
 **Dependencies:** {{dependencies}}
+{{#if requirements}}
+**Requirements:** {{requirements}}
+{{/if}}
+
+{{#if categoryGuidance}}
+{{categoryGuidance}}
+{{/if}}
+
+{{#if securityLevel !== 'standard'}}
+## Security Requirements
+
+This project has **{{securityLevel}}** security requirements:
+- Encrypt sensitive data at rest (PII, credentials)
+- Use parameterized queries exclusively
+- Implement proper access controls at database level
+- Log all data access for audit trails
+- Plan for data retention and deletion policies
+{{/if}}
+
+## Your Project's Code Patterns
+
+{{codeExamples}}
+
+## Detected Patterns
+
+{{patterns}}
+
+{{#if patternRules}}
+{{patternRules}}
+{{/if}}
 
 ## When to Use This Agent
 

@@ -3,7 +3,7 @@
  */
 import type { MonorepoPackage } from '../types/codebase.js';
 import type { Recommendations } from '../types/config.js';
-import type { GoalCategory, ProjectMode, ProjectSpec } from '../types/goal.js';
+import type { GoalCategory, ProjectMode, ProjectSpec, ProjectRequirement } from '../types/goal.js';
 export declare function collectProjectGoal(): Promise<{
     description: string;
     category: GoalCategory;
@@ -26,9 +26,11 @@ export declare function detectProjectMode(projectRoot?: string): Promise<Project
 export declare function collectNewProjectSpec(): Promise<ProjectSpec>;
 /**
  * Convert ProjectSpec to ProjectGoal for existing codebase flow compatibility
+ * Now preserves requirements for use in recommendations and templates
  */
 export declare function specToGoal(spec: ProjectSpec): {
     description: string;
     category: GoalCategory;
+    requirements: ProjectRequirement[];
 };
 //# sourceMappingURL=prompts.d.ts.map

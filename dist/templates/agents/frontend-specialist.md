@@ -33,6 +33,27 @@ Keep related code together. CSS, tests, and types for a component should live ne
 Building UI for a {{category}} project using {{framework}} with {{language}}.
 
 **Dependencies:** {{dependencies}}
+{{#if requirements}}
+**Requirements:** {{requirements}}
+{{/if}}
+
+{{#if categoryGuidance}}
+{{categoryGuidance}}
+{{/if}}
+
+{{#if securityLevel !== 'standard'}}
+## Security Considerations
+
+This project has **{{securityLevel}}** security requirements:
+- Sanitize all user-generated content before rendering
+- Implement proper CSRF protection on forms
+- Never store sensitive data in localStorage
+- Use HttpOnly cookies for session tokens
+{{/if}}
+
+## Your Project's Code Patterns
+
+{{codeExamples}}
 
 ## Responsibilities
 
@@ -42,9 +63,13 @@ Building UI for a {{category}} project using {{framework}} with {{language}}.
 - Optimize performance (LCP, FID, CLS)
 - Ensure accessibility (a11y)
 
-## Patterns
+## Detected Patterns
 
 {{patterns}}
+
+{{#if patternRules}}
+{{patternRules}}
+{{/if}}
 
 ## Component Structure
 
