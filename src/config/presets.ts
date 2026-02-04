@@ -266,10 +266,69 @@ export const GOAL_PRESETS: Record<GoalCategory, GoalPreset> = {
     ]
   },
 
+  'business-plan': {
+    recommendedAgents: [
+      { name: 'product-manager', priority: 10, reason: 'Strategy and market analysis' },
+      { name: 'copywriter', priority: 9, reason: 'Compelling narratives and pitches' },
+      { name: 'architect', priority: 8, reason: 'Business model structure' },
+      { name: 'docs-writer', priority: 8, reason: 'Clear documentation and specs' },
+      { name: 'designer', priority: 7, reason: 'Pitch deck visuals' }
+    ],
+    recommendedSkills: [],
+    technicalRequirements: []
+  },
+
+  'marketing-campaign': {
+    recommendedAgents: [
+      { name: 'copywriter', priority: 10, reason: 'Campaign copy and messaging' },
+      { name: 'product-manager', priority: 9, reason: 'Campaign strategy and targeting' },
+      { name: 'designer', priority: 9, reason: 'Creative assets and visuals' },
+      { name: 'docs-writer', priority: 7, reason: 'Campaign briefs and guidelines' },
+      { name: 'performance-optimizer', priority: 6, reason: 'Conversion optimization' }
+    ],
+    recommendedSkills: [],
+    technicalRequirements: []
+  },
+
+  'content-creation': {
+    recommendedAgents: [
+      { name: 'copywriter', priority: 10, reason: 'Writing and content strategy' },
+      { name: 'docs-writer', priority: 9, reason: 'Structured content and guides' },
+      { name: 'designer', priority: 7, reason: 'Visual content and layouts' },
+      { name: 'product-manager', priority: 6, reason: 'Content planning and calendars' }
+    ],
+    recommendedSkills: [],
+    technicalRequirements: []
+  },
+
+  'research-analysis': {
+    recommendedAgents: [
+      { name: 'architect', priority: 9, reason: 'Analytical frameworks' },
+      { name: 'docs-writer', priority: 9, reason: 'Research reports and findings' },
+      { name: 'product-manager', priority: 8, reason: 'Research planning and synthesis' },
+      { name: 'database-specialist', priority: 7, reason: 'Data analysis patterns' },
+      { name: 'copywriter', priority: 6, reason: 'Clear communication of insights' }
+    ],
+    recommendedSkills: [],
+    technicalRequirements: []
+  },
+
+  'project-docs': {
+    recommendedAgents: [
+      { name: 'docs-writer', priority: 10, reason: 'Documentation best practices' },
+      { name: 'architect', priority: 9, reason: 'System and process design' },
+      { name: 'product-manager', priority: 8, reason: 'Requirements and specs' },
+      { name: 'copywriter', priority: 7, reason: 'Clear and engaging writing' },
+      { name: 'code-reviewer', priority: 6, reason: 'Technical accuracy' }
+    ],
+    recommendedSkills: [],
+    technicalRequirements: []
+  },
+
   'custom': {
     recommendedAgents: [
-      { name: 'code-reviewer', priority: 8, reason: 'Code quality assurance' },
-      { name: 'debugger', priority: 7, reason: 'Troubleshooting' },
+      { name: 'code-reviewer', priority: 8, reason: 'Quality assurance' },
+      { name: 'debugger', priority: 7, reason: 'Problem solving' },
       { name: 'docs-writer', priority: 6, reason: 'Documentation' },
       { name: 'architect', priority: 6, reason: 'System design' },
       { name: 'product-manager', priority: 5, reason: 'Requirements definition' }

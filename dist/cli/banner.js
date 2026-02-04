@@ -23,8 +23,8 @@ export const BANNER = `
 ║  ██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   ███████║         ║
 ║  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝         ║
 ║                                                               ║
-║  Generate context-aware Claude Code configs for your projects ║
-║  Powered by Play New's community of SMEs and SuperAgents      ║
+║           Your AI team, configured in seconds                 ║
+║     Powered by Play New's community of expert specialists     ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
 `;
@@ -55,13 +55,13 @@ export function displayBanner() {
 export function displaySuccess(summary) {
     console.log("\n" +
         pc.green("✓") +
-        pc.bold(" Done! Your Claude Code setup is ready.\n"));
-    console.log(pc.bold("Output: ") + orange(summary.projectRoot));
-    console.log(pc.dim(`  CLAUDE.md                    Project context for Claude`));
-    console.log(pc.dim(`  .claude/settings.json        Editor configuration`));
-    console.log(pc.dim(`  .claude/agents/              ${summary.agents.length} specialized agents`));
-    console.log(pc.dim(`  .claude/skills/              ${summary.skills.length} framework guides`));
-    console.log(pc.bold("\nYour agents:"));
+        pc.bold(" Done! Your AI specialists are ready to work.\n"));
+    console.log(pc.bold("Created: ") + orange(summary.projectRoot));
+    console.log(pc.dim(`  CLAUDE.md                    Your project context`));
+    console.log(pc.dim(`  .claude/settings.json        Configuration`));
+    console.log(pc.dim(`  .claude/agents/              ${summary.agents.length} specialists`));
+    console.log(pc.dim(`  .claude/skills/              ${summary.skills.length} areas of expertise`));
+    console.log(pc.bold("\nYour team:"));
     summary.agents.forEach((agent) => {
         const expertInfo = AGENT_EXPERTS[agent];
         if (expertInfo) {
@@ -73,23 +73,23 @@ export function displaySuccess(summary) {
             console.log(pc.green(`  ✓ `) + pc.bold(agent));
         }
     });
-    console.log(pc.bold("\nYour skills:"));
+    console.log(pc.bold("\nTheir expertise:"));
     summary.skills.forEach((skill) => {
         console.log(pc.green(`  ✓ `) + pc.bold(skill));
     });
     console.log("\n" + pc.bold("Why this matters:"));
-    console.log(orange("  Claude now writes code following proven patterns"));
-    console.log(orange("  Each agent applies real engineering principles"));
-    console.log(orange("  Skills teach Claude your exact tech stack"));
-    console.log("\n" + pc.bold("Start using it:"));
+    console.log(orange("  Your AI team follows proven methods from industry experts"));
+    console.log(orange("  Each specialist brings deep knowledge to their domain"));
+    console.log(orange("  Results match the quality of seasoned professionals"));
+    console.log("\n" + pc.bold("Get started:"));
     console.log(pc.dim("  1. ") +
         pc.bold("claude") +
-        pc.dim(" — Open Claude Code in your project"));
+        pc.dim(" — Open Claude in your project"));
     console.log(pc.dim("  2. ") +
-        pc.bold("/agent backend-engineer") +
-        pc.dim(" — Switch to a specific agent"));
+        pc.bold("/agent copywriter") +
+        pc.dim(" — Switch to a specialist (e.g., copywriter, architect)"));
     console.log(pc.dim("  3. ") +
-        pc.dim("Ask Claude to build something — expert patterns apply automatically\n"));
+        pc.dim("Ask for help — your team's expertise kicks in automatically\n"));
 }
 export function displayError(error) {
     console.log("\n" + pc.red("✗") + pc.bold(" Something went wrong\n"));

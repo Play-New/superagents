@@ -13,31 +13,40 @@ export async function collectProjectGoal() {
     // Use p.group for back navigation support
     const answers = await p.group({
         description: () => p.text({
-            message: 'Describe your project in one sentence',
-            placeholder: 'A SaaS dashboard with real-time analytics and team collaboration',
+            message: 'What do you want to create or get help with?',
+            placeholder: 'e.g., "A marketing strategy for Q2" or "A React app with auth"',
             validate: (value) => {
                 if (!value || value.trim().length === 0) {
-                    return 'A brief description helps us recommend the right agents';
+                    return 'Tell us a bit more so we can find the right specialists for you';
                 }
                 if (value.trim().length < 10) {
-                    return 'Add a bit more detail so we can tailor recommendations';
+                    return 'A few more details will help us match you with the best team';
                 }
                 return undefined;
             }
         }),
         category: ({ results }) => {
             const suggestedCategory = categorizeGoal(results.description || '');
-            // Build options array, filtering out duplicate
+            // Build options array with grouped categories
             const allOptions = [
-                { value: 'saas-dashboard', label: 'SaaS Dashboard', hint: 'Admin panels, analytics, metrics' },
-                { value: 'ecommerce', label: 'E-Commerce', hint: 'Stores, carts, payments' },
-                { value: 'content-platform', label: 'Content Platform', hint: 'Blogs, CMS, publishing' },
-                { value: 'api-service', label: 'API Service', hint: 'REST, GraphQL, microservices' },
-                { value: 'mobile-app', label: 'Mobile App', hint: 'React Native, iOS, Android' },
+                // Development
+                { value: 'saas-dashboard', label: 'Web App', hint: 'Dashboards, SaaS, admin panels' },
+                { value: 'api-service', label: 'API / Backend', hint: 'Services, integrations, data' },
+                { value: 'mobile-app', label: 'Mobile App', hint: 'iOS, Android, React Native' },
+                { value: 'ecommerce', label: 'E-Commerce', hint: 'Online stores, carts, payments' },
                 { value: 'cli-tool', label: 'CLI Tool', hint: 'Terminal utilities, automation' },
-                { value: 'data-pipeline', label: 'Data Pipeline', hint: 'ETL, batch processing' },
-                { value: 'auth-service', label: 'Auth Service', hint: 'Login, OAuth, sessions' },
-                { value: 'custom', label: 'Other', hint: 'Different project type' }
+                { value: 'data-pipeline', label: 'Data Pipeline', hint: 'ETL, analytics, processing' },
+                { value: 'content-platform', label: 'Content Platform', hint: 'Blogs, CMS, publishing' },
+                { value: 'auth-service', label: 'Auth Service', hint: 'Login, OAuth, identity' },
+                // Business & Strategy
+                { value: 'business-plan', label: 'Business Plan', hint: 'Strategy, financials, pitch decks' },
+                { value: 'marketing-campaign', label: 'Marketing', hint: 'Campaigns, ads, growth strategy' },
+                // Content & Research
+                { value: 'content-creation', label: 'Content', hint: 'Articles, posts, copywriting' },
+                { value: 'research-analysis', label: 'Research', hint: 'Analysis, reports, insights' },
+                { value: 'project-docs', label: 'Documentation', hint: 'Specs, processes, guides' },
+                // Other
+                { value: 'custom', label: 'Something else', hint: 'Tell us what you need' }
             ];
             // Add detected option at the top if it's not 'custom'
             const options = suggestedCategory !== 'custom'
@@ -51,7 +60,7 @@ export async function collectProjectGoal() {
                 ]
                 : allOptions;
             return p.select({
-                message: 'What type of project is this?',
+                message: 'What are you working on?',
                 options: options,
                 initialValue: suggestedCategory
             });
@@ -105,7 +114,7 @@ export async function confirmSelections(recommendations) {
         .join('\n');
     p.note(agentLines, 'Recommended Agents');
     const agents = await p.multiselect({
-        message: `Which agents should Claude use?`,
+        message: `Which specialists should help you?`,
         options: recommendations.agents.map(agent => {
             const expert = AGENT_EXPERTS[agent.name];
             const expertHint = expert ? `${expert.domain} (${expert.expert})` : agent.reasons[0];
@@ -128,7 +137,7 @@ export async function confirmSelections(recommendations) {
         .map(s => `  ${pc.green('✓')} ${pc.bold(s.name)} - ${pc.dim(s.reasons[0])}`)
         .join('\n'), 'Recommended Skills');
     const skills = await p.multiselect({
-        message: `Which framework guides should Claude learn?`,
+        message: `What expertise should your team have?`,
         options: recommendations.skills.map(skill => ({
             value: skill.name,
             label: skill.name,
@@ -208,33 +217,33 @@ export async function collectNewProjectSpec() {
     const answers = await p.group({
         // Step 1: Core vision
         vision: () => p.text({
-            message: 'Describe what you want to build',
-            placeholder: 'A task management app with team collaboration',
+            message: 'What do you want to create?',
+            placeholder: 'e.g., "A task app for my team" or "A landing page for my startup"',
             validate: (value) => {
                 if (!value || value.trim().length === 0) {
-                    return 'A brief description helps us pick the right agents';
+                    return 'Tell us what you have in mind so we can assemble the right team';
                 }
                 if (value.trim().length < 10) {
-                    return 'Add a bit more detail so we can tailor recommendations';
+                    return 'A few more details will help us find the best specialists';
                 }
                 return undefined;
             }
         }),
-        // Step 2: Tech stack
+        // Step 2: Tech stack / tools
         stack: () => p.select({
-            message: 'What tech stack will you use?',
+            message: 'What tools or platform will you work with?',
             options: [
                 { value: 'nextjs', label: 'Next.js', hint: 'Full-stack React with SSR' },
                 { value: 'react-node', label: 'React + Node.js', hint: 'Separate frontend/backend' },
                 { value: 'python-fastapi', label: 'Python + FastAPI', hint: 'Python API backend' },
                 { value: 'vue-node', label: 'Vue + Node.js', hint: 'Vue frontend, Node backend' },
-                { value: 'other', label: 'Other', hint: 'Different stack' }
+                { value: 'other', label: 'Other / Not sure yet', hint: 'We will figure it out together' }
             ],
             initialValue: 'nextjs'
         }),
         // Step 3: Focus area
         focus: () => p.select({
-            message: 'Where will most of your work be?',
+            message: 'Where will most of your work happen?',
             options: [
                 { value: 'fullstack', label: 'Full-stack', hint: 'Both frontend and backend' },
                 { value: 'frontend', label: 'Frontend-heavy', hint: 'UI, interactions, components' },
@@ -245,13 +254,13 @@ export async function collectNewProjectSpec() {
         }),
         // Step 4: Key requirements
         requirements: () => p.multiselect({
-            message: 'What features will you need?',
+            message: 'What capabilities do you need?',
             options: [
-                { value: 'auth', label: 'Authentication', hint: 'Login, OAuth, sessions' },
-                { value: 'database', label: 'Database', hint: 'Data storage with ORM' },
-                { value: 'api', label: 'External APIs', hint: 'Third-party integrations' },
+                { value: 'auth', label: 'User accounts', hint: 'Login, signup, OAuth' },
+                { value: 'database', label: 'Data storage', hint: 'Database with ORM' },
+                { value: 'api', label: 'Integrations', hint: 'Third-party APIs and services' },
                 { value: 'payments', label: 'Payments', hint: 'Stripe, subscriptions' },
-                { value: 'realtime', label: 'Real-time', hint: 'WebSockets, live updates' }
+                { value: 'realtime', label: 'Real-time updates', hint: 'WebSockets, live data' }
             ],
             required: false
         })
@@ -303,14 +312,22 @@ function categorizeGoal(description) {
     }
     const lower = description.toLowerCase();
     const keywords = {
-        'saas-dashboard': ['saas', 'dashboard', 'analytics', 'metrics', 'admin', 'panel'],
-        'ecommerce': ['ecommerce', 'e-commerce', 'shop', 'store', 'marketplace', 'cart'],
-        'content-platform': ['blog', 'cms', 'content', 'articles', 'posts', 'publishing'],
-        'api-service': ['api', 'rest', 'graphql', 'microservice', 'backend', 'service'],
-        'mobile-app': ['mobile', 'app', 'ios', 'android', 'react native', 'flutter'],
-        'cli-tool': ['cli', 'command line', 'terminal', 'tool', 'utility'],
-        'data-pipeline': ['pipeline', 'etl', 'data processing', 'batch', 'warehouse'],
-        'auth-service': ['authentication', 'auth', 'login', 'identity', 'sso', 'oauth'],
+        // Development categories
+        'saas-dashboard': ['saas', 'dashboard', 'analytics', 'metrics', 'admin', 'panel', 'web app'],
+        'ecommerce': ['ecommerce', 'e-commerce', 'shop', 'store', 'marketplace', 'cart', 'checkout'],
+        'content-platform': ['blog', 'cms', 'publishing platform', 'media site'],
+        'api-service': ['api', 'rest', 'graphql', 'microservice', 'backend', 'service', 'integration'],
+        'mobile-app': ['mobile', 'ios', 'android', 'react native', 'flutter', 'phone app'],
+        'cli-tool': ['cli', 'command line', 'terminal', 'script', 'automation tool'],
+        'data-pipeline': ['pipeline', 'etl', 'data processing', 'batch', 'warehouse', 'data flow'],
+        'auth-service': ['authentication', 'auth system', 'login system', 'identity', 'sso', 'oauth'],
+        // Business & Strategy categories
+        'business-plan': ['business plan', 'pitch deck', 'investor', 'startup plan', 'financials', 'funding', 'strategy document'],
+        'marketing-campaign': ['marketing', 'campaign', 'ads', 'advertising', 'growth', 'seo', 'social media', 'launch'],
+        // Content & Research categories
+        'content-creation': ['article', 'blog post', 'copywriting', 'content', 'writing', 'newsletter', 'copy'],
+        'research-analysis': ['research', 'analysis', 'report', 'insights', 'study', 'findings', 'data analysis'],
+        'project-docs': ['documentation', 'specs', 'requirements', 'process', 'guide', 'handbook', 'sop'],
         'custom': []
     };
     for (const [category, words] of Object.entries(keywords)) {
@@ -322,15 +339,23 @@ function categorizeGoal(description) {
 }
 function getCategoryLabel(category) {
     const labels = {
-        'saas-dashboard': 'SaaS Dashboard',
-        'ecommerce': 'E-Commerce Platform',
+        // Development
+        'saas-dashboard': 'Web App',
+        'ecommerce': 'E-Commerce',
         'content-platform': 'Content Platform',
-        'api-service': 'API Service',
+        'api-service': 'API / Backend',
         'mobile-app': 'Mobile App',
         'cli-tool': 'CLI Tool',
         'data-pipeline': 'Data Pipeline',
         'auth-service': 'Auth Service',
-        'custom': 'Custom'
+        // Business & Strategy
+        'business-plan': 'Business Plan',
+        'marketing-campaign': 'Marketing',
+        // Content & Research
+        'content-creation': 'Content',
+        'research-analysis': 'Research',
+        'project-docs': 'Documentation',
+        'custom': 'Something else'
     };
     return labels[category];
 }

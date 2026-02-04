@@ -2,7 +2,17 @@
  * Types for project goal analysis
  */
 
+// Work area to group related project types
+export type WorkArea =
+  | 'development'
+  | 'marketing'
+  | 'content'
+  | 'business'
+  | 'research'
+  | 'operations';
+
 export type GoalCategory =
+  // Development
   | 'saas-dashboard'
   | 'ecommerce'
   | 'content-platform'
@@ -11,6 +21,12 @@ export type GoalCategory =
   | 'cli-tool'
   | 'data-pipeline'
   | 'auth-service'
+  // Business & Content
+  | 'business-plan'
+  | 'marketing-campaign'
+  | 'content-creation'
+  | 'research-analysis'
+  | 'project-docs'
   | 'custom';
 
 export type TechCategory = 'frontend' | 'backend' | 'database' | 'auth' | 'payments' | 'deployment';
@@ -62,12 +78,22 @@ export type ProjectMode = 'new' | 'existing';
 // Focus area for new projects
 export type ProjectFocus = 'frontend' | 'backend' | 'fullstack' | 'api';
 
-// Tech stack options for new projects
+// Tech stack options for new projects (development)
 export type TechStack =
   | 'react-node'
   | 'nextjs'
   | 'python-fastapi'
   | 'vue-node'
+  | 'other';
+
+// Tool options for non-development projects
+export type WorkTools =
+  | 'google-workspace'
+  | 'notion'
+  | 'excel-sheets'
+  | 'figma'
+  | 'hubspot'
+  | 'salesforce'
   | 'other';
 
 // Requirements that can be selected for new projects

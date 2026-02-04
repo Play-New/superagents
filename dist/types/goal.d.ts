@@ -1,7 +1,8 @@
 /**
  * Types for project goal analysis
  */
-export type GoalCategory = 'saas-dashboard' | 'ecommerce' | 'content-platform' | 'api-service' | 'mobile-app' | 'cli-tool' | 'data-pipeline' | 'auth-service' | 'custom';
+export type WorkArea = 'development' | 'marketing' | 'content' | 'business' | 'research' | 'operations';
+export type GoalCategory = 'saas-dashboard' | 'ecommerce' | 'content-platform' | 'api-service' | 'mobile-app' | 'cli-tool' | 'data-pipeline' | 'auth-service' | 'business-plan' | 'marketing-campaign' | 'content-creation' | 'research-analysis' | 'project-docs' | 'custom';
 export type TechCategory = 'frontend' | 'backend' | 'database' | 'auth' | 'payments' | 'deployment';
 export type Priority = 'required' | 'recommended' | 'optional';
 export interface TechRequirement {
@@ -37,6 +38,7 @@ export interface GoalPreset {
 export type ProjectMode = 'new' | 'existing';
 export type ProjectFocus = 'frontend' | 'backend' | 'fullstack' | 'api';
 export type TechStack = 'react-node' | 'nextjs' | 'python-fastapi' | 'vue-node' | 'other';
+export type WorkTools = 'google-workspace' | 'notion' | 'excel-sheets' | 'figma' | 'hubspot' | 'salesforce' | 'other';
 export type ProjectRequirement = 'auth' | 'payments' | 'realtime' | 'database' | 'api';
 export interface ProjectSpec {
     vision: string;
