@@ -44,6 +44,7 @@ import { AIGenerator } from './generator/index.js';
 import { ConfigUpdater } from './updater/index.js';
 import { authenticateWithAnthropic } from './utils/auth.js';
 import { setVerbose, log } from './utils/logger.js';
+import { checkForUpdates, displayUpdateNotification } from './utils/version-check.js';
 import { OutputWriter } from './writer/index.js';
 
 // Type imports
@@ -158,6 +159,12 @@ async function handleUpdateMode(isVerbose: boolean): Promise<void> {
     console.log(orange('  ~ ') + 'Regenerated CLAUDE.md');
   }
   console.log('');
+
+  // Check for CLI updates
+  const updateInfo = await checkForUpdates();
+  if (updateInfo) {
+    displayUpdateNotification(updateInfo);
+  }
 }
 
 program
@@ -181,6 +188,9 @@ program
 
       // Display banner
       displayBanner();
+
+      // Start version check in background (non-blocking)
+      const updateCheckPromise = checkForUpdates();
 
       if (isDryRun) {
         console.log(pc.yellow('\n  Preview mode: no files will be created\n'));
@@ -331,6 +341,12 @@ program
 
       // Display success message
       displaySuccess(summary);
+
+      // Show update notification if available (after success)
+      const updateInfo = await updateCheckPromise;
+      if (updateInfo) {
+        displayUpdateNotification(updateInfo);
+      }
 
     } catch (error) {
       if (error instanceof Error) {
