@@ -137,10 +137,8 @@ export async function confirmSelections(recommendations: Recommendations): Promi
     'Recommended Agents'
   );
 
-  console.log(pc.dim('  ↑↓ to move, Space to select, Enter when done\n'));
-
   const agents = await p.multiselect({
-    message: `Which specialists should help you?`,
+    message: `Which specialists should help you? ${pc.dim('(Space to select)')}`,
     options: recommendations.agents.map(agent => {
       const expert = AGENT_EXPERTS[agent.name];
       const expertHint = expert ? `${expert.domain} (${expert.expert})` : agent.reasons[0];
@@ -168,10 +166,8 @@ export async function confirmSelections(recommendations: Recommendations): Promi
     'Recommended Skills'
   );
 
-  console.log(pc.dim('  ↑↓ to move, Space to select, Enter when done\n'));
-
   const skills = await p.multiselect({
-    message: `What expertise should your team have?`,
+    message: `What expertise should your team have? ${pc.dim('(Space to select)')}`,
     options: recommendations.skills.map(skill => ({
       value: skill.name,
       label: skill.name,
@@ -209,10 +205,8 @@ export async function selectPackages(packages: MonorepoPackage[]): Promise<strin
     'Monorepo Detected'
   );
 
-  console.log(pc.dim('  ↑↓ to move, Space to select, Enter when done\n'));
-
   const selected = await p.multiselect({
-    message: `Which packages need Claude configuration?`,
+    message: `Which packages need Claude configuration? ${pc.dim('(Space to select)')}`,
     options: packages.map(pkg => ({
       value: pkg.relativePath,
       label: pkg.name,
@@ -311,9 +305,8 @@ export async function collectNewProjectSpec(): Promise<ProjectSpec> {
 
     // Step 4: Key requirements
     requirements: () => {
-      console.log(pc.dim('  ↑↓ to move, Space to select, Enter when done\n'));
       return p.multiselect<{ value: ProjectRequirement; label: string; hint: string }[], ProjectRequirement>({
-        message: 'What capabilities do you need?',
+        message: `What capabilities do you need? ${pc.dim('(Space to select)')}`,
         options: [
           { value: 'auth', label: 'User accounts', hint: 'Login, signup, OAuth' },
           { value: 'database', label: 'Data storage', hint: 'Database with ORM' },
