@@ -15,7 +15,7 @@ import pc from 'picocolors';
 import { orange } from '../cli/colors.js';
 
 // Current version from package.json
-const CURRENT_VERSION = '1.3.1';
+const CURRENT_VERSION = '1.4.0';
 
 // GitHub raw URL for package.json
 const VERSION_URL = 'https://raw.githubusercontent.com/Play-New/superagents/main/package.json';

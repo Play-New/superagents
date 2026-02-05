@@ -138,7 +138,7 @@ async function handleUpdateMode(isVerbose) {
 program
     .name('superagents')
     .description('Generate expert-backed Claude Code configurations for your project')
-    .version('1.3.1')
+    .version('1.4.0')
     .option('--dry-run', 'Preview generation without API calls or file changes')
     .option('-v, --verbose', 'Show detailed logs')
     .option('-u, --update', 'Add or remove agents from existing config')
