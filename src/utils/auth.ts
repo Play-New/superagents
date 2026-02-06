@@ -189,8 +189,20 @@ export async function authenticateWithAnthropic(): Promise<AuthResult> {
 
   // Handle browser login via Claude CLI
   if (choice === 'login') {
-    // Auto-install Claude CLI if not present (silent, clean spinner)
+    // Install Claude CLI if not present — ask for consent first
     if (!cliInstalled) {
+      const consent = await p.confirm({
+        message: 'SuperAgents needs Claude Code. Install it now? (npm install -g @anthropic-ai/claude-code)',
+        active: 'Yes',
+        inactive: 'No'
+      });
+
+      if (p.isCancel(consent) || !consent) {
+        // User declined installation — fall through to API key
+        p.log.info('Skipping installation. You can enter an API key instead.');
+        return await promptForApiKey();
+      }
+
       const installSpinner = p.spinner();
       installSpinner.start('Installing Claude Code...');
 

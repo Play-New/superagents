@@ -4,14 +4,17 @@
  * Fetches latest version from GitHub and notifies user if update available.
  * Caches check results to avoid spamming (checks once per day).
  */
+import { createRequire } from 'module';
 import https from 'https';
 import os from 'os';
 import path from 'path';
 import fs from 'fs-extra';
 import pc from 'picocolors';
 import { orange } from '../cli/colors.js';
-// Current version from package.json
-const CURRENT_VERSION = '1.4.5';
+// Read version from package.json (single source of truth)
+const require = createRequire(import.meta.url);
+const pkg = require('../../package.json');
+const CURRENT_VERSION = pkg.version;
 // GitHub raw URL for package.json
 const VERSION_URL = 'https://raw.githubusercontent.com/Play-New/superagents/main/package.json';
 // Cache settings

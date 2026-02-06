@@ -5,7 +5,7 @@
  * - Use local templates for common agents/skills to reduce API calls
  * - Template variables: {{projectName}}, {{framework}}, {{goal}}, etc.
  * - Conditional sections: {{#if category === 'cli-tool'}}...{{/if}}
- * - Pattern-aware rules: {{#if patterns.includes('Repository')}}...{{/if}}
+ * - Truthy checks: {{#if categoryGuidance}}...{{/if}}
  * - Fallback to API generation if no template exists
  */
 
@@ -112,7 +112,7 @@ export async function loadTemplate(
 /**
  * Build template variables from generation context
  */
-function buildTemplateVars(context: GenerationContext): TemplateVars {
+export function buildTemplateVars(context: GenerationContext): TemplateVars {
   const category = context.goal.category;
   const patterns = context.codebase.detectedPatterns.map(p => p.type);
 
@@ -235,23 +235,31 @@ function buildCategoryGuidance(category: string): string {
 function buildPatternRules(patterns: string[]): string {
   const rules: string[] = [];
 
-  if (patterns.includes('Repository')) {
-    rules.push(`### Repository Pattern Rules
-- Keep data access logic in repository classes
-- Don't bypass repository for direct database calls
-- Use repository interfaces for testing
-- Repositories should return domain objects, not ORM entities`);
+  if (patterns.includes('api-routes')) {
+    rules.push(`### API Routes Rules
+- Validate all inputs at the route boundary
+- Use proper HTTP methods and status codes
+- Keep route handlers thin (delegate to services)
+- Implement consistent error response format`);
   }
 
-  if (patterns.includes('MVC')) {
-    rules.push(`### MVC Pattern Rules
-- Keep controllers thin (delegate to services)
-- Business logic belongs in models/services, not controllers
-- Views should not contain business logic
-- Use view models for complex data transformations`);
+  if (patterns.includes('server-actions')) {
+    rules.push(`### Server Actions Rules
+- Validate inputs with Zod schemas
+- Handle errors gracefully with proper error boundaries
+- Keep actions focused on a single mutation
+- Revalidate paths/tags after mutations`);
   }
 
-  if (patterns.includes('Service Layer')) {
+  if (patterns.includes('components')) {
+    rules.push(`### Component Pattern Rules
+- Keep components focused on a single responsibility
+- Extract reusable logic into custom hooks
+- Use composition over prop drilling
+- Co-locate component styles and tests`);
+  }
+
+  if (patterns.includes('services')) {
     rules.push(`### Service Layer Rules
 - Services coordinate business operations
 - Keep services stateless when possible
@@ -259,19 +267,44 @@ function buildPatternRules(patterns: string[]): string {
 - Services should not depend on HTTP context directly`);
   }
 
-  if (patterns.includes('Factory')) {
-    rules.push(`### Factory Pattern Rules
-- Use factories for complex object creation
-- Keep factory logic focused on construction
-- Consider builder pattern for objects with many options`);
+  if (patterns.includes('models')) {
+    rules.push(`### Data Model Rules
+- Keep data access logic in model/repository classes
+- Don't bypass models for direct database calls
+- Use model interfaces for testing
+- Models should encapsulate validation logic`);
   }
 
-  if (patterns.includes('Middleware')) {
+  if (patterns.includes('controllers')) {
+    rules.push(`### Controller Pattern Rules
+- Keep controllers thin (delegate to services)
+- Business logic belongs in services, not controllers
+- Use consistent response format
+- Handle validation at the controller boundary`);
+  }
+
+  if (patterns.includes('middleware')) {
     rules.push(`### Middleware Pattern Rules
 - Keep middleware focused on a single concern
 - Order middleware appropriately (auth before handlers)
 - Avoid heavy computation in middleware
 - Use middleware for cross-cutting concerns only`);
+  }
+
+  if (patterns.includes('hooks')) {
+    rules.push(`### Custom Hooks Rules
+- Name hooks with use* prefix
+- Keep hooks focused on a single concern
+- Extract complex state logic into dedicated hooks
+- Avoid side effects in render path`);
+  }
+
+  if (patterns.includes('tests')) {
+    rules.push(`### Testing Rules
+- Follow Arrange-Act-Assert pattern
+- Test behavior, not implementation details
+- Keep tests focused and independent
+- Use descriptive test names that explain the scenario`);
   }
 
   return rules.join('\n\n');
@@ -283,7 +316,7 @@ function buildPatternRules(patterns: string[]): string {
  * - {{#if securityLevel === 'high'}}...{{/if}}
  * - {{#if categoryGuidance}}...{{/if}}
  */
-function renderTemplate(template: string, vars: TemplateVars): string {
+export function renderTemplate(template: string, vars: TemplateVars): string {
   let result = template;
 
   // First, handle conditional sections

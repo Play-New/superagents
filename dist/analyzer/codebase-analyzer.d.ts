@@ -6,9 +6,20 @@ export declare class CodebaseAnalyzer {
     private projectRoot;
     constructor(projectRoot: string);
     analyze(): Promise<CodebaseAnalysis>;
+    /**
+     * Load and parse .superagentsignore from project root.
+     * Returns an empty array if the file does not exist.
+     */
+    private loadIgnorePatterns;
+    /**
+     * Build the full ignore list by merging defaults with user patterns
+     */
+    private buildIgnorePatterns;
     private detectProjectType;
     private detectFramework;
     private getDependencies;
+    private getDevDependencies;
+    private countFilesAndLines;
     private categorizeDependency;
     private detectPatterns;
     private inferAgents;
@@ -19,7 +30,8 @@ export declare class CodebaseAnalyzer {
      */
     private sampleFiles;
     /**
-     * Try to add a file to sampled files array
+     * Try to add a file to sampled files array.
+     * Skips files that match any of the ignore patterns.
      */
     private tryAddFile;
     /**

@@ -36,21 +36,15 @@ import { CodebaseAnalyzer } from './analyzer/codebase-analyzer.js';
 import { cache } from './cache/index.js';
 import { displayBanner, displayError, displaySuccess } from './cli/banner.js';
 import { orange } from './cli/colors.js';
-import { displayDryRunPreview } from './cli/dry-run.js';
 import { EXIT_CODES, getExitCodeForError } from './cli/exit-codes.js';
-import { collectProjectGoal, collectNewProjectSpec, detectProjectMode, specToGoal, selectModel, confirmSelections } from './cli/prompts.js';
-import { RecommendationEngine } from './context/recommendation-engine.js';
-import { AIGenerator } from './generator/index.js';
+import { runGenerationPipeline } from './pipeline.js';
 import { ConfigUpdater } from './updater/index.js';
 import { authenticateWithAnthropic } from './utils/auth.js';
 import { setVerbose, log } from './utils/logger.js';
-import { checkForUpdates, displayUpdateNotification } from './utils/version-check.js';
-import { OutputWriter } from './writer/index.js';
+import { checkForUpdates, displayUpdateNotification, getCurrentVersion } from './utils/version-check.js';
 
 // Type imports
-import type { CodebaseAnalysis } from './types/codebase.js';
 import type { GenerationContext } from './types/generation.js';
-import type { ProjectGoal, ProjectMode } from './types/goal.js';
 
 const execAsync = promisify(exec);
 const program = new Command();
@@ -170,7 +164,7 @@ async function handleUpdateMode(isVerbose: boolean): Promise<void> {
 program
   .name('superagents')
   .description('Generate expert-backed Claude Code configurations for your project')
-  .version('1.4.1')
+  .version(getCurrentVersion())
   .option('--dry-run', 'Preview generation without API calls or file changes')
   .option('-v, --verbose', 'Show detailed logs')
   .option('-u, --update', 'Add or remove agents from existing config')
@@ -210,137 +204,18 @@ program
         log.debug(`Auth method: ${auth.method}`);
       }
 
-      // Step 2: Detect project mode (new vs existing)
-      const projectMode: ProjectMode = await detectProjectMode(process.cwd());
-      log.debug(`Project mode: ${projectMode}`);
-
-      // Step 3: Collect project goal based on mode
-      let goal: ProjectGoal;
-
-      if (projectMode === 'new') {
-        // New project: guided spec gathering
-        console.log(pc.dim('  Detected: New/minimal project\n'));
-        const spec = await collectNewProjectSpec();
-        const goalData = specToGoal(spec);
-        goal = {
-          ...goalData,
-          requirements: goalData.requirements,  // Preserve requirements from spec
-          technicalRequirements: [],
-          suggestedAgents: [],
-          suggestedSkills: [],
-          timestamp: new Date().toISOString(),
-          confidence: 1.0
-        };
-      } else {
-        // Existing codebase: standard flow
-        console.log(pc.dim('  Detected: Existing codebase\n'));
-        const goalData = await collectProjectGoal();
-        goal = {
-          ...goalData,
-          technicalRequirements: [],
-          suggestedAgents: [],
-          suggestedSkills: [],
-          timestamp: new Date().toISOString(),
-          confidence: 1.0
-        };
-      }
-
-      log.debug(`Goal: ${goal.description}`);
-      log.debug(`Category: ${goal.category}`);
-
-      // Step 3: Select AI model
-      const model = await selectModel();
-      log.debug(`Selected model: ${model}`);
-
-      // Initialize cache
-      await cache.init();
-
-      // Step 4: Analyze codebase (with caching)
-      const spinner = p.spinner();
-      spinner.start('Scanning your project...');
-
-      let codebaseAnalysis: CodebaseAnalysis;
-      const cachedAnalysis = await cache.getCachedAnalysis(process.cwd());
-
-      if (cachedAnalysis) {
-        codebaseAnalysis = cachedAnalysis;
-        spinner.stop(pc.green('✓') + ' Project scanned ' + pc.dim('(cached)'));
-        log.verbose('Using cached codebase analysis');
-      } else {
-        const analyzer = new CodebaseAnalyzer(process.cwd());
-        codebaseAnalysis = await analyzer.analyze();
-        await cache.setCachedAnalysis(process.cwd(), codebaseAnalysis);
-        spinner.stop(pc.green('✓') + ' Project scanned');
-        log.verbose('Codebase analysis cached for future runs');
-      }
-
-      log.section('Codebase Analysis');
-      log.table({
-        'Project Type': codebaseAnalysis.projectType,
-        'Language': codebaseAnalysis.language || 'Unknown',
-        'Framework': codebaseAnalysis.framework || 'None',
-        'Total Files': codebaseAnalysis.totalFiles,
-        'Dependencies': codebaseAnalysis.dependencies.length
+      // Steps 2-8: Run the generation pipeline
+      const result = await runGenerationPipeline({
+        projectRoot: process.cwd(),
+        isDryRun,
+        isVerbose,
+        auth
       });
 
-      // Step 5: Generate recommendations
-      spinner.start('Finding the best agents for your project...');
-
-      const recommendationEngine = new RecommendationEngine();
-      const recommendations = await recommendationEngine.recommend(goal, codebaseAnalysis);
-
-      spinner.stop(pc.green('✓') + ' Found ' + recommendations.defaultAgents.length + ' recommended agents');
-
-      log.section('Recommendations');
-      log.verbose(`Agents: ${recommendations.agents.map(a => `${a.name}(${a.score})`).join(', ')}`);
-      log.verbose(`Skills: ${recommendations.skills.map(s => `${s.name}(${s.score})`).join(', ')}`);
-
-      // Step 6: Confirm selections
-      const selections = await confirmSelections(recommendations);
-
-      log.debug(`Selected agents: ${selections.agents.join(', ')}`);
-      log.debug(`Selected skills: ${selections.skills.join(', ')}`);
-
-      // Build context
-      const context: GenerationContext = {
-        goal,
-        codebase: codebaseAnalysis,
-        selectedAgents: selections.agents,
-        selectedSkills: selections.skills,
-        selectedModel: model,
-        authMethod: auth.method,
-        apiKey: auth.apiKey,
-        sampledFiles: codebaseAnalysis.sampledFiles || [],
-        verbose: isVerbose,
-        dryRun: isDryRun,
-        generatedAt: new Date().toISOString()
-      };
-
-      // If dry-run, show preview and exit
-      if (isDryRun) {
-        displayDryRunPreview(context);
-        return;
+      // Dry-run returns no result
+      if (result) {
+        displaySuccess(result.summary);
       }
-
-      // Step 7: Generate with AI
-      // Generator has its own ora spinner with percentage progress
-      console.log('');  // Add spacing
-
-      const generator = new AIGenerator();
-      const outputs = await generator.generateAll(context);
-
-      console.log('');  // Add spacing after generation
-
-      // Step 8: Write output
-      spinner.start('Saving configuration...');
-
-      const writer = new OutputWriter(process.cwd());
-      const summary = await writer.writeAll(outputs);
-
-      spinner.stop(pc.green('✓') + ' Configuration saved');
-
-      // Display success message
-      displaySuccess(summary);
 
       // Show update notification if available (after success)
       const updateInfo = await updateCheckPromise;

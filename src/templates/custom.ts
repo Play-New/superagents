@@ -14,6 +14,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import type { GenerationContext } from '../types/generation.js';
+import { renderTemplate, buildTemplateVars } from './loader.js';
 
 const CUSTOM_TEMPLATES_DIR = path.join(os.homedir(), '.superagents', 'templates');
 
@@ -55,34 +56,7 @@ export async function loadCustomTemplate(
   }
 
   const template = await fs.readFile(templatePath, 'utf-8');
-  return renderTemplate(template, context);
-}
-
-/**
- * Render template with context variables
- */
-function renderTemplate(template: string, context: GenerationContext): string {
-  const vars: Record<string, string> = {
-    projectName: context.goal.description.split(' ').slice(0, 3).join(' '),
-    goal: context.goal.description,
-    category: context.goal.category,
-    framework: context.codebase.framework || 'none',
-    language: context.codebase.language || 'javascript',
-    dependencies: context.codebase.dependencies.slice(0, 10).map(d => d.name).join(', '),
-    patterns: context.codebase.detectedPatterns.map(p => `${p.type}: ${p.description}`).join('\n'),
-    skills: context.selectedSkills.join(', '),
-    agents: context.selectedAgents.join(', '),
-    model: context.selectedModel,
-    generatedAt: new Date(context.generatedAt).toLocaleString()
-  };
-
-  let result = template;
-  for (const [key, value] of Object.entries(vars)) {
-    const pattern = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
-    result = result.replace(pattern, value || '');
-  }
-
-  return result;
+  return renderTemplate(template, buildTemplateVars(context));
 }
 
 /**

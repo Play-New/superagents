@@ -9,7 +9,14 @@
 import type { GenerationContext, GeneratedOutputs } from '../types/generation.js';
 export declare class AIGenerator {
     private codebaseHash;
+    private anthropicClient;
     constructor();
+    /**
+     * Get or create a shared Anthropic client instance.
+     * Lazily initialized on first API call to avoid requiring an API key
+     * when using Claude CLI auth.
+     */
+    private getClient;
     generateAll(context: GenerationContext): Promise<GeneratedOutputs>;
     /**
      * Generate an agent using local template or Claude AI (with caching)

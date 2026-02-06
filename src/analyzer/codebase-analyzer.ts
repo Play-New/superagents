@@ -7,11 +7,35 @@ import path from 'path';
 import { glob } from 'glob';
 import type { CodebaseAnalysis, ProjectType, Framework, SampledFile, MonorepoInfo, MonorepoPackage, MonorepoTool } from '../types/codebase.js';
 
+/** Default ignore patterns always applied to glob operations */
+const DEFAULT_IGNORE_PATTERNS = [
+  'node_modules/**',
+  '.git/**',
+  '.next/**',
+  'dist/**',
+  'build/**',
+  'coverage/**'
+];
+
+/**
+ * Parse a .superagentsignore file into an array of glob ignore patterns.
+ * Follows gitignore conventions: blank lines and lines starting with # are skipped.
+ */
+function parseIgnoreFile(content: string): string[] {
+  return content
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0 && !line.startsWith('#'));
+}
+
 export class CodebaseAnalyzer {
   constructor(private projectRoot: string) {}
 
   async analyze(): Promise<CodebaseAnalysis> {
     const startTime = Date.now();
+
+    // Load user-defined ignore patterns from .superagentsignore (if present)
+    const userIgnorePatterns = await this.loadIgnorePatterns();
 
     // Run analysis in parallel for performance
     const [
@@ -35,15 +59,23 @@ export class CodebaseAnalyzer {
       ? await this.getDependencies()
       : [];
 
+    // Get dev dependencies if package.json exists
+    const devDependencies = hasPackageJson
+      ? await this.getDevDependencies()
+      : [];
+
     // Detect patterns
-    const patterns = await this.detectPatterns();
+    const patterns = await this.detectPatterns(userIgnorePatterns);
+
+    // Count files and lines
+    const { totalFiles, totalLines } = await this.countFilesAndLines(userIgnorePatterns);
 
     // Sample important files for AI generation context
-    const sampledFiles = await this.sampleFiles(projectType, framework, patterns);
+    const sampledFiles = await this.sampleFiles(projectType, framework, patterns, userIgnorePatterns);
 
     // Infer agents and skills based on what we found
     const suggestedAgents = this.inferAgents(projectType, patterns);
-    const suggestedSkills = this.inferSkills(framework, dependencies);
+    const suggestedSkills = this.inferSkills(framework, [...dependencies, ...devDependencies]);
 
     return {
       projectRoot: this.projectRoot,
@@ -51,10 +83,10 @@ export class CodebaseAnalyzer {
       language,
       framework,
       dependencies,
-      devDependencies: [],
+      devDependencies,
       fileStructure: [],
-      totalFiles: 0,
-      totalLines: 0,
+      totalFiles,
+      totalLines,
       detectedPatterns: patterns,
       suggestedSkills,
       suggestedAgents,
@@ -65,6 +97,30 @@ export class CodebaseAnalyzer {
       analyzedAt: new Date().toISOString(),
       analysisTimeMs: Date.now() - startTime
     };
+  }
+
+  /**
+   * Load and parse .superagentsignore from project root.
+   * Returns an empty array if the file does not exist.
+   */
+  private async loadIgnorePatterns(): Promise<string[]> {
+    const ignorePath = path.join(this.projectRoot, '.superagentsignore');
+    try {
+      if (await fs.pathExists(ignorePath)) {
+        const content = await fs.readFile(ignorePath, 'utf-8');
+        return parseIgnoreFile(content);
+      }
+    } catch {
+      // If we can't read the ignore file, proceed without it
+    }
+    return [];
+  }
+
+  /**
+   * Build the full ignore list by merging defaults with user patterns
+   */
+  private buildIgnorePatterns(userPatterns: string[]): string[] {
+    return [...DEFAULT_IGNORE_PATTERNS, ...userPatterns];
   }
 
   private async detectProjectType(): Promise<ProjectType> {
@@ -139,6 +195,41 @@ export class CodebaseAnalyzer {
     }));
   }
 
+  private async getDevDependencies(): Promise<Array<{ name: string; version: string; category: import('../types/codebase.js').DependencyCategory }>> {
+    const pkgPath = path.join(this.projectRoot, 'package.json');
+    const pkg = await fs.readJson(pkgPath);
+
+    return Object.entries(pkg.devDependencies || {}).map(([name, version]) => ({
+      name,
+      version: version as string,
+      category: this.categorizeDependency(name)
+    }));
+  }
+
+  private async countFilesAndLines(userIgnorePatterns: string[] = []): Promise<{ totalFiles: number; totalLines: number }> {
+    try {
+      const codeFiles = await glob('**/*.{ts,tsx,js,jsx,py,go,rs,java,rb,php,cs}', {
+        cwd: this.projectRoot,
+        ignore: this.buildIgnorePatterns(userIgnorePatterns),
+        nodir: true
+      });
+
+      let totalLines = 0;
+      for (const file of codeFiles) {
+        try {
+          const content = await fs.readFile(path.join(this.projectRoot, file), 'utf-8');
+          totalLines += content.split('\n').length;
+        } catch {
+          // Skip unreadable files
+        }
+      }
+
+      return { totalFiles: codeFiles.length, totalLines };
+    } catch {
+      return { totalFiles: 0, totalLines: 0 };
+    }
+  }
+
   private categorizeDependency(name: string): import('../types/codebase.js').DependencyCategory {
     // UI libraries
     if (['react', 'vue', '@angular/core', 'svelte'].includes(name)) return 'framework';
@@ -165,14 +256,15 @@ export class CodebaseAnalyzer {
     return 'other';
   }
 
-  private async detectPatterns(): Promise<Array<{ type: import('../types/codebase.js').PatternType; paths: string[]; confidence: number; description: string }>> {
+  private async detectPatterns(userIgnorePatterns: string[] = []): Promise<Array<{ type: import('../types/codebase.js').PatternType; paths: string[]; confidence: number; description: string }>> {
     const patterns: Array<{ type: import('../types/codebase.js').PatternType; paths: string[]; confidence: number; description: string }> = [];
+    const ignorePatterns = this.buildIgnorePatterns(userIgnorePatterns);
 
     try {
-      // API routes (Next.js App Router)
+      // API routes (Next.js App Router + Express-style)
       const apiRoutes = await glob('**/app/**/route.{ts,js}', {
         cwd: this.projectRoot,
-        ignore: ['node_modules/**', '.next/**', 'dist/**']
+        ignore: ignorePatterns
       });
 
       if (apiRoutes.length > 0) {
@@ -184,10 +276,25 @@ export class CodebaseAnalyzer {
         });
       }
 
+      // Server actions
+      const serverActions = await glob('**/actions/**/*.{ts,js}', {
+        cwd: this.projectRoot,
+        ignore: ignorePatterns
+      });
+
+      if (serverActions.length > 0) {
+        patterns.push({
+          type: 'server-actions' as const,
+          paths: serverActions,
+          confidence: 0.8,
+          description: 'Server actions'
+        });
+      }
+
       // React components
       const components = await glob('**/components/**/*.{tsx,jsx}', {
         cwd: this.projectRoot,
-        ignore: ['node_modules/**', '.next/**', 'dist/**']
+        ignore: ignorePatterns
       });
 
       if (components.length > 0) {
@@ -198,7 +305,112 @@ export class CodebaseAnalyzer {
           description: 'React components'
         });
       }
-    } catch (error) {
+
+      // Services
+      const services = await glob('**/{services,service}/**/*.{ts,js}', {
+        cwd: this.projectRoot,
+        ignore: ignorePatterns
+      });
+
+      if (services.length > 0) {
+        patterns.push({
+          type: 'services' as const,
+          paths: services,
+          confidence: 0.9,
+          description: 'Service layer modules'
+        });
+      }
+
+      // Models / entities
+      const models = await glob('**/{models,entities,schemas}/**/*.{ts,js}', {
+        cwd: this.projectRoot,
+        ignore: ignorePatterns
+      });
+
+      if (models.length > 0) {
+        patterns.push({
+          type: 'models' as const,
+          paths: models,
+          confidence: 0.9,
+          description: 'Data models or entities'
+        });
+      }
+
+      // Controllers
+      const controllers = await glob('**/{controllers,controller}/**/*.{ts,js}', {
+        cwd: this.projectRoot,
+        ignore: ignorePatterns
+      });
+
+      if (controllers.length > 0) {
+        patterns.push({
+          type: 'controllers' as const,
+          paths: controllers,
+          confidence: 0.9,
+          description: 'Controller modules'
+        });
+      }
+
+      // Middleware
+      const middleware = await glob('**/{middleware,middlewares}/**/*.{ts,js}', {
+        cwd: this.projectRoot,
+        ignore: ignorePatterns
+      });
+
+      if (middleware.length > 0) {
+        patterns.push({
+          type: 'middleware' as const,
+          paths: middleware,
+          confidence: 0.9,
+          description: 'Middleware modules'
+        });
+      }
+
+      // Hooks
+      const hooks = await glob('**/{hooks,composables}/**/*.{ts,tsx,js,jsx}', {
+        cwd: this.projectRoot,
+        ignore: ignorePatterns
+      });
+
+      if (hooks.length > 0) {
+        patterns.push({
+          type: 'hooks' as const,
+          paths: hooks,
+          confidence: 0.9,
+          description: 'Custom hooks or composables'
+        });
+      }
+
+      // Utils
+      const utils = await glob('**/{utils,helpers,lib}/**/*.{ts,js}', {
+        cwd: this.projectRoot,
+        ignore: ignorePatterns
+      });
+
+      if (utils.length > 0) {
+        patterns.push({
+          type: 'utils' as const,
+          paths: utils,
+          confidence: 0.7,
+          description: 'Utility and helper modules'
+        });
+      }
+
+      // Tests
+      const tests = await glob('**/*.{test,spec}.{ts,tsx,js,jsx}', {
+        cwd: this.projectRoot,
+        ignore: ignorePatterns
+      });
+
+      if (tests.length > 0) {
+        patterns.push({
+          type: 'tests' as const,
+          paths: tests,
+          confidence: 1.0,
+          description: 'Test files'
+        });
+      }
+    } catch {
       // Ignore glob errors
     }
 
@@ -257,23 +469,25 @@ export class CodebaseAnalyzer {
   private async sampleFiles(
     projectType: ProjectType,
     _framework: Framework | null,
-    patterns: Array<{ type: string; paths: string[] }>
+    patterns: Array<{ type: string; paths: string[] }>,
+    userIgnorePatterns: string[] = []
   ): Promise<SampledFile[]> {
     const sampledFiles: SampledFile[] = [];
     const maxFiles = 20;
     const maxFileSize = 100000; // 100KB max per file
     const maxLines = 500; // Max 500 lines per file
+    const ignorePatterns = this.buildIgnorePatterns(userIgnorePatterns);
 
     try {
       // Always include package.json and tsconfig if they exist
-      await this.tryAddFile(sampledFiles, 'package.json', 'Project dependencies and scripts');
-      await this.tryAddFile(sampledFiles, 'tsconfig.json', 'TypeScript configuration');
+      await this.tryAddFile(sampledFiles, 'package.json', 'Project dependencies and scripts', ignorePatterns);
+      await this.tryAddFile(sampledFiles, 'tsconfig.json', 'TypeScript configuration', ignorePatterns);
 
       // Include framework config files
       if (projectType === 'nextjs') {
-        await this.tryAddFile(sampledFiles, 'next.config.js', 'Next.js configuration');
-        await this.tryAddFile(sampledFiles, 'next.config.mjs', 'Next.js configuration');
-        await this.tryAddFile(sampledFiles, 'next.config.ts', 'Next.js configuration');
+        await this.tryAddFile(sampledFiles, 'next.config.js', 'Next.js configuration', ignorePatterns);
+        await this.tryAddFile(sampledFiles, 'next.config.mjs', 'Next.js configuration', ignorePatterns);
+        await this.tryAddFile(sampledFiles, 'next.config.ts', 'Next.js configuration', ignorePatterns);
       }
 
       // Sample a few files from each pattern type
@@ -285,6 +499,7 @@ export class CodebaseAnalyzer {
             sampledFiles,
             filePath,
             `Example ${pattern.type}`,
+            ignorePatterns,
             maxFileSize,
             maxLines
           );
@@ -309,6 +524,7 @@ export class CodebaseAnalyzer {
           sampledFiles,
           entryPoint,
           'Entry point file',
+          ignorePatterns,
           maxFileSize,
           maxLines
         );
@@ -323,15 +539,34 @@ export class CodebaseAnalyzer {
   }
 
   /**
-   * Try to add a file to sampled files array
+   * Try to add a file to sampled files array.
+   * Skips files that match any of the ignore patterns.
    */
   private async tryAddFile(
     sampledFiles: SampledFile[],
     relativePath: string,
     purpose: string,
+    ignorePatterns: string[] = [],
     maxSize: number = 100000,
     maxLines: number = 500
   ): Promise<void> {
+    // Check if the file matches any ignore pattern
+    if (ignorePatterns.length > 0) {
+      const matched = await glob(relativePath, {
+        cwd: this.projectRoot,
+        ignore: ignorePatterns,
+        nodir: true
+      });
+      if (matched.length === 0) {
+        // File is either ignored or doesn't exist — check existence separately
+        const fullPath = path.join(this.projectRoot, relativePath);
+        if (await fs.pathExists(fullPath)) {
+          // File exists but is ignored
+          return;
+        }
+      }
+    }
+
     const fullPath = path.join(this.projectRoot, relativePath);
 
     try {
@@ -359,7 +594,7 @@ export class CodebaseAnalyzer {
         content,
         purpose
       });
-    } catch (error) {
+    } catch {
       // Silently skip files that can't be read
     }
   }

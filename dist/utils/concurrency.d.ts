@@ -19,4 +19,16 @@ export declare function parallelGenerateWithErrors<T>(items: string[], generator
         error: Error;
     }>;
 }>;
+/**
+ * Options for retry behavior
+ */
+export interface RetryOptions {
+    maxRetries?: number;
+    baseDelayMs?: number;
+}
+/**
+ * Execute an async function with exponential backoff retry.
+ * Only retries on transient errors (429, 5xx, network).
+ */
+export declare function withRetry<T>(fn: () => Promise<T>, opts?: RetryOptions): Promise<T>;
 //# sourceMappingURL=concurrency.d.ts.map
