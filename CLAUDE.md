@@ -33,18 +33,20 @@ TypeScript CLI | Node.js >= 20 | ESM | @anthropic-ai/sdk, @clack/prompts, comman
 
 ```
 src/
-  index.ts           CLI entry, subcommands
+  index.ts           CLI entry, subcommands (status, update, cache, templates, export, import)
   pipeline.ts        Generation pipeline orchestration
   analyzer/          Codebase detection (type, framework, deps, patterns)
+  blueprints/        Project blueprints (definitions, matcher, renderer)
   context/           Recommendation engine (scoring, overlap, auto-linking)
   config/            Presets (14 goal categories), export/import
   generator/         AI generation via Anthropic SDK
-  writer/            File output (CLAUDE.md, agents, skills, settings, docs)
+  status/            ROADMAP.md parser and progress display
+  writer/            File output (CLAUDE.md, ROADMAP.md, agents, skills, settings, docs)
   updater/           Incremental config updates
   cache/             File-based analysis cache
   cli/               Prompts, banner, colors, UX flow
   templates/         Agent + skill markdown templates (21 agents, 23 skills)
-  types/             All type definitions
+  types/             All type definitions (includes blueprint.ts)
   utils/             Auth, logger, version check
 tests/               Vitest test suites
 ```
@@ -69,15 +71,16 @@ tests/               Vitest test suites
 - async/await, never raw promise chains
 - Validate at system boundaries only
 
-## v2 Phase 1 Priorities (Current Sprint)
+## v2 Phase Summary
 
-1. Lean config generation (< 700 token CLAUDE.md, "Would Claude Know This?" filter)
-2. Permissions + security defaults in settings.json (infer from project)
-3. Stop hooks for auto-formatting (detect lint/format commands)
-4. First prompt guidance (copy-pasteable prompt in success message)
-5. Agent/skill reduction (2-4 agents max, auto-link skills)
-6. Slash commands generation (`/status`, `/fix`, `/next`, `/ship`)
-7. MCP server suggestions (SETUP.md with install commands)
+### Phase 1 (Complete)
+Lean config generation, permissions/security defaults, Stop hooks, first prompt guidance, agent/skill reduction with auto-linking, slash commands (`/status`, `/fix`, `/next`, `/ship`), MCP server suggestions.
+
+### Phase 2 (Complete)
+Project Blueprints — 5 curated templates (SaaS Dashboard, Landing+Waitlist, API Backend, Internal Tool, Marketplace) with phased ROADMAP.md generation. Blueprint matcher (category/keyword/stack/focus scoring). `superagents status` command with per-phase progress bars.
+
+### Phase 3 (Next)
+Config evolution, blueprint publishing, expanded test coverage.
 
 ## Deep Context
 
@@ -88,5 +91,5 @@ tests/               Vitest test suites
 ## Checkpoint
 
 - **Branch**: v2
-- **Last completed**: UX flow enhancement (selectTeam, overlap suppression, project-specific reasons, preset tuning, lean defaults)
-- **Next**: Phase 1 Sprint 1 — lean CLAUDE.md generation, agent token reduction, "Would Claude Know This?" filter
+- **Last completed**: Phase 2 — Project Blueprints (5 blueprints, matcher, renderer, ROADMAP.md writer, `superagents status` command)
+- **Next**: Phase 3 — config evolution (`superagents evolve`), blueprint publishing, test coverage expansion
