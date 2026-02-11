@@ -1,6 +1,7 @@
 /**
  * Types for AI generation
  */
+import type { BlueprintId } from './blueprint.js';
 import type { ProjectGoal } from './goal.js';
 import type { CodebaseAnalysis, SampledFile } from './codebase.js';
 import type { AuthMethod } from '../utils/auth.js';
@@ -15,6 +16,7 @@ export interface GenerationContext {
     sampledFiles: SampledFile[];
     verbose?: boolean;
     dryRun?: boolean;
+    selectedBlueprint?: BlueprintId;
     generatedAt: string;
 }
 export interface AgentOutput {
@@ -77,6 +79,7 @@ export interface GeneratedOutputs {
     commands: CommandOutput[];
     settings: SettingsJson;
     docs: DocOutput[];
+    roadmapMd?: string;
 }
 export interface WriteSummary {
     totalFiles: number;
@@ -86,5 +89,6 @@ export interface WriteSummary {
     docs: string[];
     projectRoot: string;
     claudeDir: string;
+    hasRoadmap: boolean;
 }
 //# sourceMappingURL=generation.d.ts.map

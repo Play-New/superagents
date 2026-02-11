@@ -13,6 +13,8 @@ import path from 'path';
 import Anthropic from '@anthropic-ai/sdk';
 import ora from 'ora';
 // Internal modules
+import { BLUEPRINTS } from '../blueprints/definitions.js';
+import { renderRoadmap } from '../blueprints/renderer.js';
 import { cache } from '../cache/index.js';
 import { buildAgentPrompt as buildCompressedAgentPrompt, buildSkillPrompt as buildCompressedSkillPrompt, buildClaudeMdPrompt as buildCompressedClaudeMdPrompt } from '../prompts/templates.js';
 import { hasCustomTemplate, loadCustomTemplate } from '../templates/custom.js';
@@ -206,6 +208,15 @@ export class AIGenerator {
         }
         // Generate slash commands (template-based, no API calls)
         const commands = this.generateSlashCommands(context);
+        // Generate ROADMAP.md if a blueprint was selected
+        let roadmapMd;
+        if (context.selectedBlueprint) {
+            const blueprint = BLUEPRINTS.find(b => b.id === context.selectedBlueprint);
+            if (blueprint) {
+                roadmapMd = renderRoadmap(blueprint, context);
+                log.verbose(`Generated ROADMAP.md for blueprint: ${blueprint.name}`);
+            }
+        }
         spinner.succeed(`Generation complete! [100%]`);
         // Summary logging
         log.section('Generation Summary');
@@ -222,7 +233,8 @@ export class AIGenerator {
             commands,
             claudeMd,
             settings,
-            docs
+            docs,
+            roadmapMd
         };
     }
     /**

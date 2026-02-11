@@ -137,6 +137,35 @@ export async function selectModel(showPicker) {
     });
     return result.model;
 }
+export async function selectBlueprint(matches) {
+    if (matches.length === 0) {
+        return null;
+    }
+    const result = await p.select({
+        message: 'Start with a project blueprint?',
+        options: [
+            ...matches.map(m => {
+                const phaseCount = m.blueprint.phases.length;
+                const taskCount = m.blueprint.phases.reduce((sum, ph) => sum + ph.tasks.length, 0);
+                return {
+                    value: m.blueprint.id,
+                    label: m.blueprint.name,
+                    hint: `${phaseCount} phases, ${taskCount} tasks — ${m.blueprint.description}`
+                };
+            }),
+            {
+                value: 'skip',
+                label: 'Skip',
+                hint: 'No blueprint — just generate agents and skills'
+            }
+        ]
+    });
+    if (p.isCancel(result)) {
+        p.cancel('Operation cancelled');
+        process.exit(0);
+    }
+    return result === 'skip' ? null : result;
+}
 export async function selectTeam(recommendations) {
     let agents = [];
     let skills = [];

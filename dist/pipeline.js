@@ -9,9 +9,10 @@ import * as p from '@clack/prompts';
 import pc from 'picocolors';
 // Internal modules
 import { CodebaseAnalyzer } from './analyzer/codebase-analyzer.js';
+import { matchBlueprints } from './blueprints/matcher.js';
 import { cache } from './cache/index.js';
 import { displayDryRunPreview } from './cli/dry-run.js';
-import { collectProjectGoal, collectNewProjectSpec, detectProjectMode, specToGoal, selectModel, selectTeam } from './cli/prompts.js';
+import { collectProjectGoal, collectNewProjectSpec, detectProjectMode, specToGoal, selectModel, selectTeam, selectBlueprint } from './cli/prompts.js';
 import { RecommendationEngine } from './context/recommendation-engine.js';
 import { AIGenerator } from './generator/index.js';
 import { log } from './utils/logger.js';
@@ -38,10 +39,12 @@ export async function runGenerationPipeline(options) {
     const spinner = p.spinner();
     let codebaseAnalysis;
     let goal;
+    let selectedBlueprintId;
+    let spec;
     if (projectMode === 'new') {
         // New project: collect goal first, then analyze
         console.log(pc.dim('  Detected: New/minimal project\n'));
-        const spec = await collectNewProjectSpec();
+        spec = await collectNewProjectSpec();
         const goalData = specToGoal(spec);
         goal = {
             ...goalData,
@@ -52,6 +55,15 @@ export async function runGenerationPipeline(options) {
             timestamp: new Date().toISOString(),
             confidence: 1.0
         };
+        // Blueprint matching for new projects
+        const blueprintMatches = matchBlueprints(goal, spec);
+        if (blueprintMatches.length > 0) {
+            const chosen = await selectBlueprint(blueprintMatches);
+            if (chosen) {
+                selectedBlueprintId = chosen;
+                log.debug(`Selected blueprint: ${chosen}`);
+            }
+        }
         spinner.start('Scanning your project...');
         const cachedAnalysis = await cache.getCachedAnalysis(projectRoot);
         if (cachedAnalysis) {
@@ -131,6 +143,7 @@ export async function runGenerationPipeline(options) {
         sampledFiles: codebaseAnalysis.sampledFiles || [],
         verbose: isVerbose,
         dryRun: isDryRun,
+        selectedBlueprint: selectedBlueprintId,
         generatedAt: new Date().toISOString()
     };
     // If dry-run, show preview and exit

@@ -1,6 +1,7 @@
 /**
  * Interactive prompts using @clack/prompts
  */
+import type { BlueprintId, BlueprintMatch } from '../types/blueprint.js';
 import type { CodebaseAnalysis, MonorepoPackage } from '../types/codebase.js';
 import type { Recommendations } from '../types/config.js';
 import type { GoalCategory, ProjectMode, ProjectSpec, ProjectRequirement } from '../types/goal.js';
@@ -9,6 +10,7 @@ export declare function collectProjectGoal(codebaseAnalysis?: CodebaseAnalysis):
     category: GoalCategory;
 }>;
 export declare function selectModel(showPicker?: boolean): Promise<'opus' | 'sonnet'>;
+export declare function selectBlueprint(matches: BlueprintMatch[]): Promise<BlueprintId | null>;
 export interface TeamSelection {
     agents: string[];
     skills: string[];

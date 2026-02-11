@@ -1,9 +1,9 @@
 /**
  * Recommendation engine - combines goal and codebase analysis
  */
-import type { ProjectGoal } from '../types/goal.js';
-import type { CodebaseAnalysis } from '../types/codebase.js';
-import type { Recommendations } from '../types/config.js';
+import type { ProjectGoal } from "../types/goal.js";
+import type { CodebaseAnalysis } from "../types/codebase.js";
+import type { Recommendations } from "../types/config.js";
 export declare class RecommendationEngine {
     static readonly AGENT_SKILL_LINKS: Record<string, string[]>;
     private static readonly TECH_KEYWORDS;

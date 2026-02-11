@@ -79,6 +79,9 @@ export function displaySuccess(
     const cmdList = summary.commands.map(c => `/${c}`).join(', ');
     console.log(pc.dim(`  .claude/commands/            ${summary.commands.length} slash commands (${cmdList})`));
   }
+  if (summary.hasRoadmap) {
+    console.log(pc.dim(`  ROADMAP.md                   Phased project plan with tasks`));
+  }
   console.log(pc.dim(`  docs/                        Architecture & setup guides`));
 
   console.log(pc.bold("\nYour team:"));
@@ -148,11 +151,14 @@ export function displaySuccess(
 }
 
 function buildFirstPrompt(
-  _summary: WriteSummary,
+  summary: WriteSummary,
   codebase?: CodebaseAnalysis,
   projectMode?: ProjectMode
 ): string {
   if (!codebase || projectMode === 'new') {
+    if (summary.hasRoadmap) {
+      return 'Read CLAUDE.md and ROADMAP.md. Start with Phase 1, Task 1. Check off tasks as you complete them.';
+    }
     const framework = codebase?.framework || 'the project';
     return `Read CLAUDE.md, then set up the project structure with ${framework}. Start with the file structure and basic layout.`;
   }

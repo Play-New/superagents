@@ -82,6 +82,17 @@ export class OutputWriter {
       )
     );
 
+    // Write ROADMAP.md to project root if present
+    if (outputs.roadmapMd) {
+      writeOperations.push(
+        fs.writeFile(
+          path.join(this.projectRoot, 'ROADMAP.md'),
+          outputs.roadmapMd,
+          'utf-8'
+        )
+      );
+    }
+
     // Execute all writes in parallel
     await Promise.all(writeOperations);
 
@@ -94,14 +105,16 @@ export class OutputWriter {
       await fs.writeFile(path.join(docDir, doc.filename), doc.content, 'utf-8');
     }
 
+    const hasRoadmap = !!outputs.roadmapMd;
     return {
-      totalFiles: outputs.agents.length + outputs.skills.length + outputs.commands.length + outputs.docs.length + 2,
+      totalFiles: outputs.agents.length + outputs.skills.length + outputs.commands.length + outputs.docs.length + 2 + (hasRoadmap ? 1 : 0),
       agents: outputs.agents.map(a => a.agentName),
       skills: outputs.skills.map(s => s.skillName),
       commands: outputs.commands.map(c => c.commandName),
       docs: outputs.docs.map(d => d.filename),
       projectRoot: this.projectRoot,
-      claudeDir
+      claudeDir,
+      hasRoadmap
     };
   }
 }

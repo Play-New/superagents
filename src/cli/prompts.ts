@@ -13,6 +13,7 @@ import { AGENT_EXPERTS } from './banner.js';
 import { orange, bgOrange } from './colors.js';
 import { DISPLAY_NAMES } from './display-names.js';
 
+import type { BlueprintId, BlueprintMatch } from '../types/blueprint.js';
 import type { CodebaseAnalysis, Framework, MonorepoPackage } from '../types/codebase.js';
 import type { Recommendations } from '../types/config.js';
 import type { GoalCategory, ProjectMode, ProjectSpec, TechStack, ProjectFocus, ProjectRequirement } from '../types/goal.js';
@@ -157,6 +158,39 @@ export async function selectModel(showPicker?: boolean): Promise<'opus' | 'sonne
   });
 
   return result.model;
+}
+
+export async function selectBlueprint(matches: BlueprintMatch[]): Promise<BlueprintId | null> {
+  if (matches.length === 0) {
+    return null;
+  }
+
+  const result = await p.select({
+    message: 'Start with a project blueprint?',
+    options: [
+      ...matches.map(m => {
+        const phaseCount = m.blueprint.phases.length;
+        const taskCount = m.blueprint.phases.reduce((sum, ph) => sum + ph.tasks.length, 0);
+        return {
+          value: m.blueprint.id as BlueprintId | 'skip',
+          label: m.blueprint.name,
+          hint: `${phaseCount} phases, ${taskCount} tasks — ${m.blueprint.description}`
+        };
+      }),
+      {
+        value: 'skip' as BlueprintId | 'skip',
+        label: 'Skip',
+        hint: 'No blueprint — just generate agents and skills'
+      }
+    ]
+  });
+
+  if (p.isCancel(result)) {
+    p.cancel('Operation cancelled');
+    process.exit(0);
+  }
+
+  return result === 'skip' ? null : result as BlueprintId;
 }
 
 export interface TeamSelection {

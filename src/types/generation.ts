@@ -2,6 +2,7 @@
  * Types for AI generation
  */
 
+import type { BlueprintId } from './blueprint.js';
 import type { ProjectGoal } from './goal.js';
 import type { CodebaseAnalysis, SampledFile } from './codebase.js';
 import type { AuthMethod } from '../utils/auth.js';
@@ -28,6 +29,9 @@ export interface GenerationContext {
   // CLI options
   verbose?: boolean;  // Show detailed output
   dryRun?: boolean;   // Preview without API calls
+
+  // Blueprint
+  selectedBlueprint?: BlueprintId;
 
   // Metadata
   generatedAt: string;
@@ -97,6 +101,7 @@ export interface GeneratedOutputs {
   commands: CommandOutput[];
   settings: SettingsJson;
   docs: DocOutput[];
+  roadmapMd?: string;
 }
 
 export interface WriteSummary {
@@ -107,4 +112,5 @@ export interface WriteSummary {
   docs: string[];
   projectRoot: string;
   claudeDir: string;
+  hasRoadmap: boolean;
 }

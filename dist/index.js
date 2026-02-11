@@ -197,6 +197,21 @@ program
         }
     }
 });
+// Status command
+program
+    .command('status')
+    .description('Show project progress from ROADMAP.md')
+    .action(async () => {
+    try {
+        const { runStatus } = await import('./status/index.js');
+        await runStatus(process.cwd());
+    }
+    catch (error) {
+        console.log(pc.red('\n  \u2717 Status check failed\n'));
+        console.log(pc.dim(`  ${error instanceof Error ? error.message : 'Unknown error'}\n`));
+        process.exit(1);
+    }
+});
 // Update command
 program
     .command('update')
