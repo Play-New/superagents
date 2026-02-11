@@ -111,6 +111,7 @@ export async function collectProjectGoal(codebaseAnalysis?: CodebaseAnalysis): P
 
       return p.select({
         message: 'What are you working on?',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         options: options as any,
         initialValue: suggestedCategory
       });
