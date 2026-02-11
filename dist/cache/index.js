@@ -12,7 +12,7 @@ import fs from 'fs-extra';
 import { log } from '../utils/logger.js';
 import { CacheEntryMetaSchema, CodebaseAnalysisSchema, GenerationCacheMetaSchema } from '../schemas/index.js';
 const CACHE_DIR = path.join(os.homedir(), '.superagents', 'cache');
-const CACHE_VERSION = '1'; // Increment when cache format changes
+const CACHE_VERSION = '2'; // Increment when cache format changes
 export class CacheManager {
     cacheDir;
     // TTL constants - centralized for easy modification

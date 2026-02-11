@@ -251,7 +251,6 @@ export class ConfigUpdater {
             // Remove skills
             settings.skills = settings.skills.filter(s => !updates.skillsToRemove.includes(s));
         }
-        settings.generatedAt = new Date().toISOString();
         await fs.writeJSON(settingsPath, settings, { spaces: 2 });
     }
 }

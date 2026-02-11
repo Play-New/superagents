@@ -71,6 +71,7 @@ export function displaySuccess(summary: {
   console.log(pc.dim(`  .claude/settings.json        Configuration`));
   console.log(pc.dim(`  .claude/agents/              ${summary.agents.length} specialists`));
   console.log(pc.dim(`  .claude/skills/              ${summary.skills.length} areas of expertise`));
+  console.log(pc.dim(`  docs/                        Architecture & setup guides`));
 
   console.log(pc.bold("\nYour team:"));
   summary.agents.forEach((agent) => {

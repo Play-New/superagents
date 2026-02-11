@@ -22,7 +22,7 @@ export class OutputWriter {
         // Create directory structure
         await fs.ensureDir(path.join(claudeDir, 'agents'));
         await fs.ensureDir(path.join(claudeDir, 'skills'));
-        await fs.ensureDir(path.join(claudeDir, 'hooks'));
+        await fs.ensureDir(path.join(this.projectRoot, 'docs'));
         // Prepare all write operations for parallel execution
         const writeOperations = [];
         // Write CLAUDE.md to project root (not inside .claude/)
@@ -39,19 +39,19 @@ export class OutputWriter {
         writeOperations.push(fs.writeFile(path.join(claudeDir, 'settings.json'), JSON.stringify(outputs.settings, null, 2), 'utf-8'));
         // Execute all writes in parallel
         await Promise.all(writeOperations);
-        // Write hooks sequentially (need chmod after write)
-        if (outputs.hooks) {
-            for (const hook of outputs.hooks) {
-                const hookPath = path.join(claudeDir, 'hooks', hook.filename);
-                await fs.writeFile(hookPath, hook.content, 'utf-8');
-                // Make hooks executable
-                await fs.chmod(hookPath, '755');
-            }
+        // Write docs files
+        for (const doc of outputs.docs) {
+            const docDir = doc.subfolder
+                ? path.join(this.projectRoot, 'docs', doc.subfolder)
+                : path.join(this.projectRoot, 'docs');
+            await fs.ensureDir(docDir);
+            await fs.writeFile(path.join(docDir, doc.filename), doc.content, 'utf-8');
         }
         return {
-            totalFiles: outputs.agents.length + outputs.skills.length + (outputs.hooks?.length || 0) + 2,
+            totalFiles: outputs.agents.length + outputs.skills.length + outputs.docs.length + 2,
             agents: outputs.agents.map(a => a.agentName),
             skills: outputs.skills.map(s => s.skillName),
+            docs: outputs.docs.map(d => d.filename),
             projectRoot: this.projectRoot,
             claudeDir
         };

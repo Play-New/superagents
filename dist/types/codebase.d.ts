@@ -66,6 +66,15 @@ export interface CodebaseAnalysis {
     mcpServers: MCPServer[];
     monorepo: MonorepoInfo | null;
     sampledFiles: SampledFile[];
+    packageManager: PackageManager;
+    lintCommand: string | null;
+    formatCommand: string | null;
+    testCommand: string | null;
+    devCommand: string | null;
+    buildCommand: string | null;
+    hasEnvFile: boolean;
+    negativeConstraints: NegativeConstraint[];
+    mcpSuggestions: McpSuggestion[];
     analyzedAt: string;
     analysisTimeMs: number;
 }
@@ -73,5 +82,16 @@ export interface SampledFile {
     path: string;
     content: string;
     purpose: string;
+}
+export type PackageManager = 'npm' | 'yarn' | 'pnpm' | 'bun';
+export interface NegativeConstraint {
+    technology: string;
+    alternative: string;
+    rule: string;
+}
+export interface McpSuggestion {
+    name: string;
+    reason: string;
+    installCommand: string;
 }
 //# sourceMappingURL=codebase.d.ts.map

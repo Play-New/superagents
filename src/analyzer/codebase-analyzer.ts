@@ -5,7 +5,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { glob } from 'glob';
-import type { CodebaseAnalysis, ProjectType, Framework, ProgrammingLanguage, SampledFile, MonorepoInfo, MonorepoPackage, MonorepoTool } from '../types/codebase.js';
+import type { CodebaseAnalysis, ProjectType, Framework, ProgrammingLanguage, SampledFile, MonorepoInfo, MonorepoPackage, MonorepoTool, PackageManager, NegativeConstraint, McpSuggestion } from '../types/codebase.js';
 
 /** Default ignore patterns always applied to glob operations */
 const DEFAULT_IGNORE_PATTERNS = [
@@ -43,13 +43,17 @@ export class CodebaseAnalyzer {
       framework,
       hasPackageJson,
       primaryLanguage,
-      monorepo
+      monorepo,
+      packageManager,
+      hasEnvFile
     ] = await Promise.all([
       this.detectProjectType(),
       this.detectFramework(),
       fs.pathExists(path.join(this.projectRoot, 'package.json')),
       this.detectPrimaryLanguage(userIgnorePatterns),
-      this.detectMonorepo()
+      this.detectMonorepo(),
+      this.detectPackageManager(),
+      this.detectEnvFiles()
     ]);
 
     const language = primaryLanguage;
@@ -63,6 +67,22 @@ export class CodebaseAnalyzer {
     const devDependencies = hasPackageJson
       ? await this.getDevDependencies()
       : [];
+
+    // Detect commands from package.json scripts
+    const allDeps = [...dependencies, ...devDependencies];
+    const [lintCommand, testCommand, devCommand, buildCommand, formatCommand] = hasPackageJson
+      ? await Promise.all([
+          this.detectLintCommand(),
+          this.detectTestCommand(),
+          this.detectDevCommand(),
+          this.detectBuildCommand(),
+          this.detectFormatCommand()
+        ])
+      : [null, null, null, null, null];
+
+    // Generate negative constraints and MCP suggestions
+    const negativeConstraints = this.generateNegativeConstraints(allDeps);
+    const mcpSuggestions = this.suggestMcpServers(allDeps, framework);
 
     // Detect patterns
     const patterns = await this.detectPatterns(userIgnorePatterns);
@@ -94,6 +114,15 @@ export class CodebaseAnalyzer {
       mcpServers: [],
       monorepo,
       sampledFiles,
+      packageManager,
+      lintCommand,
+      formatCommand,
+      testCommand,
+      devCommand,
+      buildCommand,
+      hasEnvFile,
+      negativeConstraints,
+      mcpSuggestions,
       analyzedAt: new Date().toISOString(),
       analysisTimeMs: Date.now() - startTime
     };
@@ -768,6 +797,176 @@ export class CodebaseAnalyzer {
     } catch {
       // Silently skip files that can't be read
     }
+  }
+
+  /**
+   * Detect package manager from lockfiles
+   */
+  private async detectPackageManager(): Promise<PackageManager> {
+    if (await fs.pathExists(path.join(this.projectRoot, 'bun.lockb'))) return 'bun';
+    if (await fs.pathExists(path.join(this.projectRoot, 'pnpm-lock.yaml'))) return 'pnpm';
+    if (await fs.pathExists(path.join(this.projectRoot, 'yarn.lock'))) return 'yarn';
+    return 'npm';
+  }
+
+  /**
+   * Detect lint command from package.json scripts
+   */
+  private async detectLintCommand(): Promise<string | null> {
+    try {
+      const pkg = await fs.readJson(path.join(this.projectRoot, 'package.json'));
+      const scripts = pkg.scripts || {};
+      if (scripts['lint:fix']) return `${await this.detectPackageManager()} run lint:fix`;
+      if (scripts['lint']) return `${await this.detectPackageManager()} run lint`;
+      // Check for biome
+      const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
+      if (allDeps['@biomejs/biome']) return 'npx biome check --write';
+      if (allDeps['eslint']) return 'npx eslint --fix .';
+      return null;
+    } catch { return null; }
+  }
+
+  /**
+   * Detect format command from package.json scripts
+   */
+  private async detectFormatCommand(): Promise<string | null> {
+    try {
+      const pkg = await fs.readJson(path.join(this.projectRoot, 'package.json'));
+      const scripts = pkg.scripts || {};
+      if (scripts['format']) return `${await this.detectPackageManager()} run format`;
+      const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
+      if (allDeps['prettier']) return 'npx prettier --write .';
+      if (allDeps['@biomejs/biome']) return 'npx biome format --write';
+      return null;
+    } catch { return null; }
+  }
+
+  /**
+   * Detect test command from package.json scripts
+   */
+  private async detectTestCommand(): Promise<string | null> {
+    try {
+      const pkg = await fs.readJson(path.join(this.projectRoot, 'package.json'));
+      const scripts = pkg.scripts || {};
+      if (scripts['test']) return `${await this.detectPackageManager()} test`;
+      return null;
+    } catch { return null; }
+  }
+
+  /**
+   * Detect dev command from package.json scripts
+   */
+  private async detectDevCommand(): Promise<string | null> {
+    try {
+      const pkg = await fs.readJson(path.join(this.projectRoot, 'package.json'));
+      const scripts = pkg.scripts || {};
+      if (scripts['dev']) return `${await this.detectPackageManager()} run dev`;
+      if (scripts['start:dev']) return `${await this.detectPackageManager()} run start:dev`;
+      if (scripts['start']) return `${await this.detectPackageManager()} start`;
+      return null;
+    } catch { return null; }
+  }
+
+  /**
+   * Detect build command from package.json scripts
+   */
+  private async detectBuildCommand(): Promise<string | null> {
+    try {
+      const pkg = await fs.readJson(path.join(this.projectRoot, 'package.json'));
+      const scripts = pkg.scripts || {};
+      if (scripts['build']) return `${await this.detectPackageManager()} run build`;
+      return null;
+    } catch { return null; }
+  }
+
+  /**
+   * Detect .env files
+   */
+  private async detectEnvFiles(): Promise<boolean> {
+    const envFiles = ['.env', '.env.local', '.env.development', '.env.example'];
+    for (const f of envFiles) {
+      if (await fs.pathExists(path.join(this.projectRoot, f))) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Generate negative constraints by comparing installed deps against alternative groups
+   */
+  private generateNegativeConstraints(allDeps: Array<{ name: string }>): NegativeConstraint[] {
+    const depNames = new Set(allDeps.map(d => d.name));
+    const constraints: NegativeConstraint[] = [];
+
+    const groups: Array<[string, string][]> = [
+      [['prisma', 'Prisma'], ['drizzle-orm', 'Drizzle']],
+      [['vitest', 'Vitest'], ['jest', 'Jest']],
+      [['tailwindcss', 'Tailwind CSS'], ['styled-components', 'styled-components'], ['@emotion/react', 'Emotion']],
+      [['express', 'Express'], ['fastify', 'Fastify'], ['@nestjs/core', 'NestJS']],
+      [['react', 'React'], ['vue', 'Vue'], ['svelte', 'Svelte'], ['@angular/core', 'Angular']],
+      [['next', 'Next.js'], ['nuxt', 'Nuxt']],
+      [['pino', 'Pino'], ['winston', 'Winston']],
+      [['zod', 'Zod'], ['joi', 'Joi'], ['yup', 'Yup']],
+      [['playwright', 'Playwright'], ['cypress', 'Cypress']],
+      [['@supabase/supabase-js', 'Supabase'], ['firebase', 'Firebase']],
+    ];
+
+    for (const group of groups) {
+      const installed = group.filter(([pkg]) => depNames.has(pkg));
+      const notInstalled = group.filter(([pkg]) => !depNames.has(pkg));
+
+      for (const [, installedName] of installed) {
+        for (const [, altName] of notInstalled) {
+          constraints.push({
+            technology: installedName,
+            alternative: altName,
+            rule: `Use ${installedName}, NOT ${altName}`
+          });
+        }
+      }
+    }
+
+    return constraints;
+  }
+
+  /**
+   * Suggest MCP servers based on detected dependencies
+   */
+  private suggestMcpServers(allDeps: Array<{ name: string }>, framework: Framework | null): McpSuggestion[] {
+    const depNames = new Set(allDeps.map(d => d.name));
+    const suggestions: McpSuggestion[] = [];
+
+    // Context7 is always useful
+    suggestions.push({
+      name: 'context7',
+      reason: 'Up-to-date library documentation',
+      installCommand: 'npx -y @anthropic-ai/claude-code mcp add context7 -- npx -y @upstash/context7-mcp'
+    });
+
+    if (depNames.has('@supabase/supabase-js')) {
+      suggestions.push({
+        name: 'supabase',
+        reason: 'Supabase database and auth management',
+        installCommand: 'npx -y @anthropic-ai/claude-code mcp add supabase -- npx -y @supabase/mcp-server'
+      });
+    }
+
+    if (depNames.has('stripe') || depNames.has('@stripe/stripe-js')) {
+      suggestions.push({
+        name: 'stripe',
+        reason: 'Stripe payment integration docs',
+        installCommand: 'npx -y @anthropic-ai/claude-code mcp add stripe -- npx -y @stripe/mcp'
+      });
+    }
+
+    if (framework === 'nextjs' || framework === 'react') {
+      suggestions.push({
+        name: 'browser-tools',
+        reason: 'Browser debugging and screenshots',
+        installCommand: 'npx -y @anthropic-ai/claude-code mcp add browser-tools -- npx -y @anthropic-ai/browser-tools-mcp'
+      });
+    }
+
+    return suggestions;
   }
 
   /**

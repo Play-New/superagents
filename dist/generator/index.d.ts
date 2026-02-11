@@ -49,7 +49,25 @@ export declare class AIGenerator {
     private buildClaudeMdPrompt;
     private generatePlaceholderAgent;
     private generatePlaceholderSkill;
-    private generateContextLoaderHook;
+    /**
+     * Build settings.json with permissions, deny lists, and optional lint hook
+     */
+    private buildSettings;
+    /**
+     * Generate architecture doc from detected patterns, deps, file structure
+     */
+    private generateArchitectureDoc;
+    /**
+     * Generate patterns doc with sampled file references
+     */
+    private generatePatternsDoc;
+    /**
+     * Generate setup doc with MCP suggestions, commands, onboarding
+     */
+    private generateSetupDoc;
+    /**
+     * Fallback CLAUDE.md - lean, ~700 tokens, ~50 instructions
+     */
     private generateClaudeMd;
     /**
      * Execute a prompt using the appropriate auth method

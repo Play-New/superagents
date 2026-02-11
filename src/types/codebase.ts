@@ -158,6 +158,21 @@ export interface CodebaseAnalysis {
   // Sampled files for AI context
   sampledFiles: SampledFile[];
 
+  // Detected commands and tooling
+  packageManager: PackageManager;
+  lintCommand: string | null;
+  formatCommand: string | null;
+  testCommand: string | null;
+  devCommand: string | null;
+  buildCommand: string | null;
+  hasEnvFile: boolean;
+
+  // Negative constraints (what NOT to use)
+  negativeConstraints: NegativeConstraint[];
+
+  // MCP server suggestions
+  mcpSuggestions: McpSuggestion[];
+
   // Metadata
   analyzedAt: string;
   analysisTimeMs: number;
@@ -167,4 +182,18 @@ export interface SampledFile {
   path: string;
   content: string;
   purpose: string; // Why this file was sampled
+}
+
+export type PackageManager = 'npm' | 'yarn' | 'pnpm' | 'bun';
+
+export interface NegativeConstraint {
+  technology: string;     // What IS installed (e.g., "Prisma")
+  alternative: string;    // What is NOT installed (e.g., "Drizzle")
+  rule: string;           // Human-readable rule (e.g., "Use Prisma, NOT Drizzle")
+}
+
+export interface McpSuggestion {
+  name: string;
+  reason: string;
+  installCommand: string;
 }

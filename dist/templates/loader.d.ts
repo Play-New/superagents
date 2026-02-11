@@ -21,12 +21,18 @@ interface TemplateVars {
     skills: string;
     agents: string;
     model: string;
-    generatedAt: string;
     codeExamples: string;
     requirements: string;
     securityLevel: SecurityLevel;
     categoryGuidance: string;
     patternRules: string;
+    packageManager: string;
+    lintCommand: string;
+    testCommand: string;
+    devCommand: string;
+    buildCommand: string;
+    negativeConstraints: string;
+    mcpServers: string;
 }
 /**
  * Check if a local template exists for the given item

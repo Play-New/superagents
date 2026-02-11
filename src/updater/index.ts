@@ -341,8 +341,6 @@ export class ConfigUpdater {
       settings.skills = settings.skills.filter(s => !updates.skillsToRemove.includes(s as string));
     }
 
-    settings.generatedAt = new Date().toISOString();
-
     await fs.writeJSON(settingsPath, settings, { spaces: 2 });
   }
 }

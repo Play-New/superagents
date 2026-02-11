@@ -93,24 +93,32 @@ export async function loadTemplate(type, name, context) {
 export function buildTemplateVars(context) {
     const category = context.goal.category;
     const patterns = context.codebase.detectedPatterns.map(p => p.type);
+    const codebase = context.codebase;
     return {
         projectName: context.goal.description.split(' ').slice(0, 3).join(' '),
         goal: context.goal.description,
         category: category,
-        framework: context.codebase.framework || 'none',
-        language: context.codebase.language || 'javascript',
-        dependencies: context.codebase.dependencies.slice(0, 10).map(d => d.name).join(', '),
-        patterns: context.codebase.detectedPatterns.map(p => `${p.type}: ${p.description}`).join('\n'),
+        framework: codebase.framework || 'none',
+        language: codebase.language || 'javascript',
+        dependencies: codebase.dependencies.slice(0, 10).map(d => d.name).join(', '),
+        patterns: codebase.detectedPatterns.map(p => `${p.type}: ${p.description}`).join('\n'),
         skills: context.selectedSkills.join(', '),
         agents: context.selectedAgents.join(', '),
         model: context.selectedModel,
-        generatedAt: new Date(context.generatedAt).toLocaleString(),
-        // New context-aware variables
+        // Context-aware variables
         codeExamples: buildCodeExamples(context),
         requirements: (context.goal.requirements || []).join(', '),
         securityLevel: CATEGORY_SECURITY[category] || 'standard',
         categoryGuidance: buildCategoryGuidance(category),
-        patternRules: buildPatternRules(patterns)
+        patternRules: buildPatternRules(patterns),
+        // New detection variables
+        packageManager: codebase.packageManager || 'npm',
+        lintCommand: codebase.lintCommand || '',
+        testCommand: codebase.testCommand || '',
+        devCommand: codebase.devCommand || '',
+        buildCommand: codebase.buildCommand || '',
+        negativeConstraints: (codebase.negativeConstraints || []).map(c => `- ${c.rule}`).join('\n'),
+        mcpServers: (codebase.mcpSuggestions || []).map(s => `- ${s.name}: ${s.reason}`).join('\n')
     };
 }
 /**

@@ -49,11 +49,20 @@ export interface SettingsJson {
     skills?: Record<string, {
         path: string;
     }> | string[];
+    permissions?: {
+        allow?: string[];
+        deny?: string[];
+    };
     hooks?: {
         UserPromptSubmit?: HookMatcher[];
+        Stop?: HookMatcher[];
     };
     model?: string;
-    generatedAt?: string;
+}
+export interface DocOutput {
+    filename: string;
+    content: string;
+    subfolder?: string;
 }
 export interface GeneratedOutputs {
     claudeMd: string;
@@ -61,11 +70,13 @@ export interface GeneratedOutputs {
     skills: SkillOutput[];
     hooks: HookOutput[];
     settings: SettingsJson;
+    docs: DocOutput[];
 }
 export interface WriteSummary {
     totalFiles: number;
     agents: string[];
     skills: string[];
+    docs: string[];
     projectRoot: string;
     claudeDir: string;
 }

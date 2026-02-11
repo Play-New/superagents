@@ -8,11 +8,11 @@ export const GOAL_PRESETS = {
             { name: 'backend-engineer', priority: 9, reason: 'API and data layer' },
             { name: 'api-designer', priority: 8, reason: 'RESTful API design' },
             { name: 'designer', priority: 8, reason: 'UI/UX design and consistency' },
-            { name: 'code-reviewer', priority: 7, reason: 'Code quality assurance' },
-            { name: 'architect', priority: 7, reason: 'System architecture' },
-            { name: 'debugger', priority: 6, reason: 'Troubleshooting' },
-            { name: 'product-manager', priority: 6, reason: 'Requirements and prioritization' },
-            { name: 'accessibility-specialist', priority: 5, reason: 'Inclusive UI' }
+            { name: 'code-reviewer', priority: 5, reason: 'Code quality assurance' },
+            { name: 'architect', priority: 5, reason: 'System architecture' },
+            { name: 'debugger', priority: 4, reason: 'Troubleshooting' },
+            { name: 'product-manager', priority: 4, reason: 'Requirements and prioritization' },
+            { name: 'accessibility-specialist', priority: 3, reason: 'Inclusive UI' }
         ],
         recommendedSkills: [
             { name: 'react', priority: 10, reason: 'UI framework' },
@@ -53,12 +53,12 @@ export const GOAL_PRESETS = {
         recommendedAgents: [
             { name: 'frontend-specialist', priority: 10, reason: 'Product pages and checkout UI' },
             { name: 'backend-engineer', priority: 10, reason: 'Order processing and inventory' },
-            { name: 'api-designer', priority: 8, reason: 'Cart and checkout APIs' },
             { name: 'copywriter', priority: 9, reason: 'Product descriptions and CTAs' },
             { name: 'designer', priority: 9, reason: 'Shopping experience and visual design' },
             { name: 'security-analyst', priority: 8, reason: 'Payment security' },
-            { name: 'code-reviewer', priority: 7, reason: 'Code quality' },
-            { name: 'performance-optimizer', priority: 7, reason: 'Page load optimization' }
+            { name: 'api-designer', priority: 5, reason: 'Cart and checkout APIs' },
+            { name: 'code-reviewer', priority: 5, reason: 'Code quality' },
+            { name: 'performance-optimizer', priority: 5, reason: 'Page load optimization' }
         ],
         recommendedSkills: [
             { name: 'nextjs', priority: 10, reason: 'E-commerce framework' },
@@ -92,12 +92,12 @@ export const GOAL_PRESETS = {
     'content-platform': {
         recommendedAgents: [
             { name: 'frontend-specialist', priority: 10, reason: 'Content display and layouts' },
-            { name: 'backend-engineer', priority: 8, reason: 'Content API and CMS' },
             { name: 'docs-writer', priority: 9, reason: 'Documentation and content guidelines' },
+            { name: 'backend-engineer', priority: 8, reason: 'Content API and CMS' },
             { name: 'copywriter', priority: 8, reason: 'Editorial guidelines and microcopy' },
             { name: 'designer', priority: 8, reason: 'Reading experience and typography' },
-            { name: 'code-reviewer', priority: 6, reason: 'Code quality' },
-            { name: 'performance-optimizer', priority: 7, reason: 'Content delivery optimization' }
+            { name: 'code-reviewer', priority: 4, reason: 'Code quality' },
+            { name: 'performance-optimizer', priority: 5, reason: 'Content delivery optimization' }
         ],
         recommendedSkills: [
             { name: 'nextjs', priority: 10, reason: 'SSG/SSR for content' },
@@ -127,10 +127,10 @@ export const GOAL_PRESETS = {
             { name: 'architect', priority: 9, reason: 'System architecture' },
             { name: 'database-specialist', priority: 8, reason: 'Data modeling' },
             { name: 'security-analyst', priority: 8, reason: 'API security' },
-            { name: 'sre-engineer', priority: 7, reason: 'API reliability and monitoring' },
-            { name: 'docs-writer', priority: 7, reason: 'API documentation' },
-            { name: 'testing-specialist', priority: 7, reason: 'API testing' },
-            { name: 'code-reviewer', priority: 6, reason: 'Code quality' }
+            { name: 'sre-engineer', priority: 5, reason: 'API reliability and monitoring' },
+            { name: 'docs-writer', priority: 5, reason: 'API documentation' },
+            { name: 'testing-specialist', priority: 5, reason: 'API testing' },
+            { name: 'code-reviewer', priority: 4, reason: 'Code quality' }
         ],
         recommendedSkills: [
             { name: 'nodejs', priority: 10, reason: 'Runtime' },
@@ -157,12 +157,12 @@ export const GOAL_PRESETS = {
         recommendedAgents: [
             { name: 'mobile-specialist', priority: 10, reason: 'Cross-platform mobile development' },
             { name: 'frontend-specialist', priority: 9, reason: 'Mobile UI development' },
-            { name: 'backend-engineer', priority: 8, reason: 'API for mobile app' },
             { name: 'designer', priority: 9, reason: 'Mobile UI/UX design' },
-            { name: 'api-designer', priority: 7, reason: 'Mobile API design' },
-            { name: 'accessibility-specialist', priority: 6, reason: 'Mobile accessibility' },
-            { name: 'code-reviewer', priority: 7, reason: 'Code quality' },
-            { name: 'testing-specialist', priority: 6, reason: 'Mobile testing' }
+            { name: 'backend-engineer', priority: 8, reason: 'API for mobile app' },
+            { name: 'api-designer', priority: 5, reason: 'Mobile API design' },
+            { name: 'code-reviewer', priority: 5, reason: 'Code quality' },
+            { name: 'accessibility-specialist', priority: 4, reason: 'Mobile accessibility' },
+            { name: 'testing-specialist', priority: 4, reason: 'Mobile testing' }
         ],
         recommendedSkills: [
             { name: 'react', priority: 10, reason: 'React Native base' },
@@ -189,8 +189,8 @@ export const GOAL_PRESETS = {
             { name: 'backend-engineer', priority: 10, reason: 'CLI implementation' },
             { name: 'docs-writer', priority: 9, reason: 'CLI documentation' },
             { name: 'testing-specialist', priority: 8, reason: 'CLI testing' },
-            { name: 'copywriter', priority: 7, reason: 'Help text and error messages' },
-            { name: 'code-reviewer', priority: 6, reason: 'Code quality' }
+            { name: 'copywriter', priority: 5, reason: 'Help text and error messages' },
+            { name: 'code-reviewer', priority: 4, reason: 'Code quality' }
         ],
         recommendedSkills: [
             { name: 'nodejs', priority: 10, reason: 'Runtime' },
@@ -208,12 +208,12 @@ export const GOAL_PRESETS = {
     'data-pipeline': {
         recommendedAgents: [
             { name: 'data-engineer', priority: 10, reason: 'Data pipeline design and implementation' },
-            { name: 'backend-engineer', priority: 9, reason: 'Data processing logic' },
             { name: 'database-specialist', priority: 10, reason: 'Data modeling and queries' },
+            { name: 'backend-engineer', priority: 9, reason: 'Data processing logic' },
             { name: 'architect', priority: 9, reason: 'Pipeline architecture' },
             { name: 'devops-specialist', priority: 8, reason: 'Pipeline deployment' },
-            { name: 'sre-engineer', priority: 7, reason: 'Pipeline reliability and monitoring' },
-            { name: 'code-reviewer', priority: 6, reason: 'Code quality' }
+            { name: 'sre-engineer', priority: 5, reason: 'Pipeline reliability and monitoring' },
+            { name: 'code-reviewer', priority: 4, reason: 'Code quality' }
         ],
         recommendedSkills: [
             { name: 'python', priority: 10, reason: 'Data processing language' },
@@ -240,8 +240,8 @@ export const GOAL_PRESETS = {
             { name: 'security-analyst', priority: 10, reason: 'Security best practices' },
             { name: 'api-designer', priority: 8, reason: 'Auth API design' },
             { name: 'architect', priority: 8, reason: 'Auth architecture' },
-            { name: 'testing-specialist', priority: 7, reason: 'Security testing' },
-            { name: 'code-reviewer', priority: 7, reason: 'Code quality' }
+            { name: 'testing-specialist', priority: 5, reason: 'Security testing' },
+            { name: 'code-reviewer', priority: 5, reason: 'Code quality' }
         ],
         recommendedSkills: [
             { name: 'nodejs', priority: 10, reason: 'Runtime' },
@@ -269,8 +269,8 @@ export const GOAL_PRESETS = {
             { name: 'product-manager', priority: 10, reason: 'Strategy and market analysis' },
             { name: 'copywriter', priority: 9, reason: 'Compelling narratives and pitches' },
             { name: 'architect', priority: 8, reason: 'Business model structure' },
-            { name: 'docs-writer', priority: 8, reason: 'Clear documentation and specs' },
-            { name: 'designer', priority: 7, reason: 'Pitch deck visuals' }
+            { name: 'docs-writer', priority: 5, reason: 'Clear documentation and specs' },
+            { name: 'designer', priority: 5, reason: 'Pitch deck visuals' }
         ],
         recommendedSkills: [
             { name: 'financial-planning', priority: 10, reason: 'Financial models and projections' },
@@ -283,9 +283,9 @@ export const GOAL_PRESETS = {
             { name: 'copywriter', priority: 10, reason: 'Campaign copy and messaging' },
             { name: 'product-manager', priority: 9, reason: 'Campaign strategy and targeting' },
             { name: 'designer', priority: 9, reason: 'Creative assets and visuals' },
-            { name: 'cfo', priority: 7, reason: 'Marketing budget and ROI analysis' },
-            { name: 'docs-writer', priority: 7, reason: 'Campaign briefs and guidelines' },
-            { name: 'performance-optimizer', priority: 6, reason: 'Conversion optimization' }
+            { name: 'cfo', priority: 5, reason: 'Marketing budget and ROI analysis' },
+            { name: 'docs-writer', priority: 5, reason: 'Campaign briefs and guidelines' },
+            { name: 'performance-optimizer', priority: 4, reason: 'Conversion optimization' }
         ],
         recommendedSkills: [
             { name: 'financial-planning', priority: 6, reason: 'Campaign ROI modeling' }
@@ -296,8 +296,8 @@ export const GOAL_PRESETS = {
         recommendedAgents: [
             { name: 'copywriter', priority: 10, reason: 'Writing and content strategy' },
             { name: 'docs-writer', priority: 9, reason: 'Structured content and guides' },
-            { name: 'designer', priority: 7, reason: 'Visual content and layouts' },
-            { name: 'product-manager', priority: 6, reason: 'Content planning and calendars' }
+            { name: 'designer', priority: 5, reason: 'Visual content and layouts' },
+            { name: 'product-manager', priority: 4, reason: 'Content planning and calendars' }
         ],
         recommendedSkills: [],
         technicalRequirements: []
@@ -307,8 +307,8 @@ export const GOAL_PRESETS = {
             { name: 'architect', priority: 9, reason: 'Analytical frameworks' },
             { name: 'docs-writer', priority: 9, reason: 'Research reports and findings' },
             { name: 'product-manager', priority: 8, reason: 'Research planning and synthesis' },
-            { name: 'database-specialist', priority: 7, reason: 'Data analysis patterns' },
-            { name: 'copywriter', priority: 6, reason: 'Clear communication of insights' }
+            { name: 'database-specialist', priority: 5, reason: 'Data analysis patterns' },
+            { name: 'copywriter', priority: 4, reason: 'Clear communication of insights' }
         ],
         recommendedSkills: [],
         technicalRequirements: []
@@ -318,19 +318,19 @@ export const GOAL_PRESETS = {
             { name: 'docs-writer', priority: 10, reason: 'Documentation best practices' },
             { name: 'architect', priority: 9, reason: 'System and process design' },
             { name: 'product-manager', priority: 8, reason: 'Requirements and specs' },
-            { name: 'copywriter', priority: 7, reason: 'Clear and engaging writing' },
-            { name: 'code-reviewer', priority: 6, reason: 'Technical accuracy' }
+            { name: 'copywriter', priority: 5, reason: 'Clear and engaging writing' },
+            { name: 'code-reviewer', priority: 4, reason: 'Technical accuracy' }
         ],
         recommendedSkills: [],
         technicalRequirements: []
     },
     'custom': {
         recommendedAgents: [
-            { name: 'code-reviewer', priority: 8, reason: 'Quality assurance' },
-            { name: 'debugger', priority: 7, reason: 'Problem solving' },
-            { name: 'docs-writer', priority: 6, reason: 'Documentation' },
-            { name: 'architect', priority: 6, reason: 'System design' },
-            { name: 'product-manager', priority: 5, reason: 'Requirements definition' }
+            { name: 'code-reviewer', priority: 5, reason: 'Quality assurance' },
+            { name: 'debugger', priority: 5, reason: 'Problem solving' },
+            { name: 'docs-writer', priority: 4, reason: 'Documentation' },
+            { name: 'architect', priority: 4, reason: 'System design' },
+            { name: 'product-manager', priority: 3, reason: 'Requirements definition' }
         ],
         recommendedSkills: [],
         technicalRequirements: []

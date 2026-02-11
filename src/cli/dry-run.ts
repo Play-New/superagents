@@ -19,10 +19,10 @@ import {
 
 // Rough token estimates based on typical usage
 const TOKEN_ESTIMATES = {
-  agent: { input: 2000, output: 3000 },
-  skill: { input: 1500, output: 2000 },
-  'claude-md': { input: 3000, output: 4000 },
-  hook: { input: 200, output: 300 }
+  agent: { input: 1000, output: 1500 },
+  skill: { input: 800, output: 1000 },
+  'claude-md': { input: 1500, output: 2000 },
+  hook: { input: 100, output: 200 }
 };
 
 /**
@@ -90,7 +90,9 @@ export function displayDryRunPreview(
   });
   console.log(pc.dim(`    → CLAUDE.md (Model: ${getModelDisplayName(claudeMdModel)})`));
   console.log(pc.dim('    → settings.json'));
-  console.log(pc.dim('    → hooks/context-loader.sh'));
+  console.log(pc.dim('    → docs/ARCHITECTURE.md'));
+  console.log(pc.dim('    → docs/PATTERNS.md'));
+  console.log(pc.dim('    → docs/SETUP.md'));
 
   // Output location
   console.log(pc.bold('\nWhere files will go:'));

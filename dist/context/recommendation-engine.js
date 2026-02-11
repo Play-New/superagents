@@ -2,6 +2,9 @@
  * Recommendation engine - combines goal and codebase analysis
  */
 import { GOAL_PRESETS } from '../config/presets.js';
+const SUPPRESS_FROM_DEFAULTS = new Set([
+    'debugger', 'docs-writer', 'code-reviewer', 'product-manager', 'accessibility-specialist'
+]);
 // Requirement to agent/skill boosting
 const REQUIREMENT_AGENTS = {
     'auth': {
@@ -237,10 +240,11 @@ export class RecommendationEngine {
             .sort((a, b) => b.score - a.score);
         const skills = Array.from(skillScores.values())
             .sort((a, b) => b.score - a.score);
-        // Pre-select items with score >= 70
+        // Pre-select items with score >= 80, suppress low-value agents, cap at 5
         const defaultAgents = agents
-            .filter(a => a.score >= 70)
-            .map(a => a.name);
+            .filter(a => a.score >= 80 && !SUPPRESS_FROM_DEFAULTS.has(a.name))
+            .map(a => a.name)
+            .slice(0, 5);
         const defaultSkills = skills
             .filter(s => s.score >= 70)
             .map(s => s.name);

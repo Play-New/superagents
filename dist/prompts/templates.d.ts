@@ -22,14 +22,17 @@ export declare function buildContextSection(context: GenerationContext): string;
 export declare function buildSamplesSection(context: GenerationContext, maxFiles?: number): string;
 /**
  * Compressed agent prompt template
+ * Targets <=400 tokens, project-specific only
  */
 export declare function buildAgentPrompt(agentName: string, context: GenerationContext): string;
 /**
  * Compressed skill prompt template
+ * Targets <=300 tokens, conventions only
  */
 export declare function buildSkillPrompt(skillName: string, context: GenerationContext): string;
 /**
  * Compressed CLAUDE.md prompt template
+ * Targets <=50 instructions, ~700 tokens output
  */
 export declare function buildClaudeMdPrompt(context: GenerationContext): string;
 //# sourceMappingURL=templates.d.ts.map

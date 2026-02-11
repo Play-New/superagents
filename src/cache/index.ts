@@ -19,7 +19,7 @@ import { CacheEntryMetaSchema, CodebaseAnalysisSchema, GenerationCacheMetaSchema
 import type { CodebaseAnalysis } from '../types/codebase.js';
 
 const CACHE_DIR = path.join(os.homedir(), '.superagents', 'cache');
-const CACHE_VERSION = '1'; // Increment when cache format changes
+const CACHE_VERSION = '2'; // Increment when cache format changes
 
 interface CacheEntry<T> {
   version: string;

@@ -89,186 +89,99 @@ export function buildSamplesSection(context, maxFiles = 3) {
 }
 /**
  * Compressed agent prompt template
+ * Targets <=400 tokens, project-specific only
  */
 export function buildAgentPrompt(agentName, context) {
     const contextSection = buildContextSection(context);
-    const samplesSection = buildSamplesSection(context, 2);
-    return `Generate a Claude Code agent config for "${agentName}".
+    const constraints = context.codebase.negativeConstraints.slice(0, 5).map(c => `- ${c.rule}`).join('\n');
+    return `Generate a lean Claude Code agent config for "${agentName}". Max 400 tokens output.
 
 ${contextSection}
+${constraints ? `\nConstraints:\n${constraints}` : ''}
 
-Skills: ${context.selectedSkills.join(', ')}
-${samplesSection}
-
-## Output Format
+## Output Structure (follow exactly)
 
 \`\`\`yaml
 ---
 name: ${agentName}
-description: [2-3 lines: what this agent does for ${context.goal.category} projects]
-tools: Read, Edit, Write, Glob, Grep, Bash, mcp__context7__resolve-library-id, mcp__context7__query-docs
+description: [1 line: role for ${context.goal.category}]
+tools: Read, Edit, Write, Glob, Grep, Bash
 model: ${context.selectedModel}
-skills: ${context.selectedSkills.join(', ')}
 ---
 \`\`\`
 
 # ${agentName}
-
 Senior ${agentName} for: **${context.goal.description}**
 
-## Project Context
-[What we're building, current state]
-
-## Tech Stack
-[Technologies from this codebase]
-
-## Key Locations
-\`\`\`
-[Actual file structure]
-\`\`\`
-
-## Patterns & Conventions
-[Detected patterns with code examples]
+## Stack
+[1-liner: language/framework | project type]
 
 ## Rules
-1. [Must-follow rules for this stack]
-2. [Framework-specific practices]
-3. [Goal-specific requirements]
+[5-15 bullet points: project-specific constraints, negative rules, stack-specific practices]
+
+## Patterns
+[Detected patterns from THIS codebase with file paths]
 
 ## Context7
 Use mcp__context7__resolve-library-id then mcp__context7__query-docs for docs.
 
 ---
-Be SPECIFIC and PROJECT-FOCUSED. No generic advice.`;
+CRITICAL: No generic methodology. No framework tutorials. No code examples teaching basics. No "Expert Principles" section. Project-specific only.`;
 }
 /**
  * Compressed skill prompt template
+ * Targets <=300 tokens, conventions only
  */
 export function buildSkillPrompt(skillName, context) {
     const contextSection = buildContextSection(context);
-    // Find relevant files for this skill
-    const relevantFiles = context.sampledFiles
-        .filter(f => f.content.toLowerCase().includes(skillName) || f.path.toLowerCase().includes(skillName))
-        .slice(0, 2);
-    const examplesSection = relevantFiles.length > 0
-        ? `## Examples\n${relevantFiles.map(f => `**${f.path}**:\n\`\`\`\n${summarizeFile(f.content, f.path)}\n\`\`\``).join('\n\n')}`
-        : '';
-    return `Generate a skill file for "${skillName}".
+    const constraints = context.codebase.negativeConstraints
+        .filter(c => c.technology.toLowerCase().includes(skillName) || c.alternative.toLowerCase().includes(skillName))
+        .map(c => `- ${c.rule}`).join('\n');
+    return `Generate a lean skill file for "${skillName}". Max 300 tokens output.
 
 ${contextSection}
-${examplesSection}
+${constraints ? `\nConstraints:\n${constraints}` : ''}
 
-## Output
+## Output Structure (follow exactly)
 
-# ${skillName} Skill
+# ${skillName}
 
-> [Brief description]
+> [1-line: what this skill covers for ${context.goal.category} projects]
 
-## When to Use
-[When relevant for ${context.goal.category} projects]
-
-## Key Concepts
-| Concept | Description | Use Case |
-|---------|-------------|----------|
-| [concept] | [what] | [when] |
-
-## Patterns
-[How ${skillName} is used in THIS codebase]
-
-## Examples
-\`\`\`${context.codebase.language === 'typescript' ? 'typescript' : 'javascript'}
-// [Matching project style]
-\`\`\`
+## Conventions
+[5-10 bullet points: how ${skillName} is used in THIS codebase, naming, file structure, patterns]
 
 ## Pitfalls
-- [Stack-specific pitfalls]
+[3-5 bullet points: stack-specific mistakes to avoid]
 
 ## Context7
-\`mcp__context7__query-docs\` for ${skillName} docs.
+Use mcp__context7__resolve-library-id then mcp__context7__query-docs for ${skillName} docs.
 
 ---
-Be SPECIFIC. Include REAL examples.`;
+CRITICAL: Conventions only. No tutorials. No generic patterns. No Key Concepts table. No code examples teaching basics.`;
 }
 /**
- * Coding Principles - MANDATORY section for all generated CLAUDE.md files
- * These guidelines ensure consistent, high-quality AI-assisted development
- */
-const CODING_PRINCIPLES = `## Coding Principles
-
-> Behavioral guidelines to reduce common LLM coding mistakes. These bias toward caution over speed - use judgment for trivial tasks.
-
-### 1. Think Before Coding
-
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
-
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
-
-### 2. Simplicity First
-
-**Minimum code that solves the problem. Nothing speculative.**
-
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-### 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-### 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-\`\`\`
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-\`\`\`
-
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.`;
-/**
  * Compressed CLAUDE.md prompt template
+ * Targets <=50 instructions, ~700 tokens output
  */
 export function buildClaudeMdPrompt(context) {
     const deps = context.codebase.dependencies.slice(0, 10).map(d => `${d.name}@${d.version}`).join(', ');
     const patterns = context.codebase.detectedPatterns.map(p => `${p.type}: ${p.paths.length} files`).join('\n');
-    const files = context.sampledFiles.map(f => f.path).join('\n');
+    const constraints = context.codebase.negativeConstraints.map(c => `- ${c.rule}`).join('\n');
+    const commands = [
+        context.codebase.testCommand ? `Test: ${context.codebase.testCommand}` : null,
+        context.codebase.lintCommand ? `Lint: ${context.codebase.lintCommand}` : null,
+        context.codebase.devCommand ? `Dev: ${context.codebase.devCommand}` : null,
+        context.codebase.buildCommand ? `Build: ${context.codebase.buildCommand}` : null,
+    ].filter(Boolean).join('\n');
     return `IMPORTANT INSTRUCTIONS:
 - Output ONLY the markdown content directly
 - Do NOT use any tools, function calls, or XML tags
-- Do NOT include <thinking>, <function_calls>, <invoke>, or any other XML-style tags
 - Do NOT explore or read files - use ONLY the context provided below
 - Start your response with the markdown heading immediately
+- Target ~700 tokens, max 50 instructions
 
-Generate CLAUDE.md for this project. Include the Coding Principles section EXACTLY as provided.
+Generate a lean CLAUDE.md for this project.
 
 ## Goal
 ${context.goal.description}
@@ -278,54 +191,50 @@ Category: ${context.goal.category}
 Type: ${context.codebase.projectType}
 Lang: ${context.codebase.language}
 Framework: ${context.codebase.framework || 'none'}
+PackageManager: ${context.codebase.packageManager}
 Deps: ${deps}
+HasEnvFile: ${context.codebase.hasEnvFile}
 
 Patterns:
 ${patterns || 'none'}
 
-Files:
-${files}
+Negative Constraints:
+${constraints || 'none'}
 
-## Config
-Agents: ${context.selectedAgents.join(', ')}
-Skills: ${context.selectedSkills.join(', ')}
+Commands:
+${commands || 'none detected'}
 
 ## Output Format (follow exactly)
 
-# ${context.goal.description}
+# [Project title from goal]
 
-## Vision
-[Project goal and vision - expand on what we're building]
+## Stack
+[1-liner: language/framework | project type | key deps]
 
-**Type:** ${context.goal.category}
-**Status:** ${context.codebase.totalFiles > 0 ? 'Enhancing' : 'New project'}
-**Generated:** ${new Date(context.generatedAt).toLocaleString()}
+## Hard Rules
+[5-15 bullet points: negative constraints from above, security rules if .env exists, "no features beyond asked", "no abstractions for single-use code", "match existing style"]
 
-## What We're Building
-[Detailed description of the project and key objectives]
+## Commands
+| Action | Command |
+|--------|---------|
+[detected commands as table rows]
 
-${CODING_PRINCIPLES}
+## Architecture
+[2-3 lines referencing detected patterns]
 
-## Tech Stack
-[Detected technologies as table with Category | Technology | Purpose]
+## Conventions
+[5-7 lines: file naming, import order, export style, type imports, formatting]
 
-## Project Structure
-[File structure based on detected patterns]
+## Before Coding
+1. **Think**: State assumptions, surface tradeoffs, ask if unclear
+2. **Simplify**: Minimum code that solves the problem, nothing speculative
+3. **Surgical**: Touch only what you must, clean up only your own mess
+4. **Verify**: Define success criteria, write tests, loop until green
 
-## Available Agents
-Use \`/agent <name>\` to switch:
-${context.selectedAgents.map(n => `- **${n}** - [describe when to use this agent]`).join('\n')}
-
-## Available Skills
-Use \`Skill(name)\` to load:
-${context.selectedSkills.map(n => `- **${n}** - [describe what this skill provides]`).join('\n')}
-
-## Quick Start
-1. Switch agent: \`/agent <name>\`
-2. Load skill: \`Skill(name)\`
-3. Use Context7 for up-to-date docs
+## Deep Context
+See \`.claude/docs/\` for architecture, patterns, and setup details.
 
 ---
-Generated by SuperAgents - Context-aware configuration for Claude Code`;
+CRITICAL: No agents/skills lists. No "Generated by SuperAgents". No full Coding Principles (use the 4-line "Before Coding" section). No verbose explanations. Lean and specific.`;
 }
 //# sourceMappingURL=templates.js.map

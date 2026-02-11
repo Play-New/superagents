@@ -40,6 +40,42 @@ export declare class CodebaseAnalyzer {
      */
     private tryAddFile;
     /**
+     * Detect package manager from lockfiles
+     */
+    private detectPackageManager;
+    /**
+     * Detect lint command from package.json scripts
+     */
+    private detectLintCommand;
+    /**
+     * Detect format command from package.json scripts
+     */
+    private detectFormatCommand;
+    /**
+     * Detect test command from package.json scripts
+     */
+    private detectTestCommand;
+    /**
+     * Detect dev command from package.json scripts
+     */
+    private detectDevCommand;
+    /**
+     * Detect build command from package.json scripts
+     */
+    private detectBuildCommand;
+    /**
+     * Detect .env files
+     */
+    private detectEnvFiles;
+    /**
+     * Generate negative constraints by comparing installed deps against alternative groups
+     */
+    private generateNegativeConstraints;
+    /**
+     * Suggest MCP servers based on detected dependencies
+     */
+    private suggestMcpServers;
+    /**
      * Detect if project is a monorepo and identify packages
      */
     detectMonorepo(): Promise<MonorepoInfo | null>;
