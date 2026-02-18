@@ -15,6 +15,10 @@ superagents [options]
 | `--dry-run` | - | Preview without API calls or writing files | `false` |
 | `--verbose` | `-v` | Show detailed output | `false` |
 | `--update` | `-u` | Update existing configuration | `false` |
+| `--json` | - | Non-interactive mode — outputs JSON to stdout | `false` |
+| `--goal <description>` | - | Goal description (skips interactive prompt) | - |
+| `--agents <list>` | - | Comma-separated agent names (JSON mode) | - |
+| `--skills <list>` | - | Comma-separated skill names (JSON mode) | - |
 | `--version` | - | Show version number | - |
 | `--help` | `-h` | Show help text | - |
 
@@ -523,19 +527,49 @@ sac --stats # superagents cache --stats
 
 ## Scripting
 
-### Non-Interactive Mode
+### Non-Interactive Mode (JSON Mode)
 
-SuperAgents is interactive by default. For scripting:
+Use `--json` for CI/CD pipelines and scripting. All interactive prompts are bypassed and results are written to stdout as JSON.
 
 ```bash
-# Use --dry-run for non-interactive preview
-superagents --dry-run
+# Auth is resolved automatically: ANTHROPIC_API_KEY env var, then Claude CLI
+export ANTHROPIC_API_KEY=sk-ant-...
 
-# Or pipe answers (not supported yet)
-# echo -e "api-key\nBuild a REST API\n\n\n" | superagents
+# Minimal — uses default agent recommendations
+superagents --json --goal "build a REST API"
+
+# Explicit agent + skill selection
+superagents --json \
+  --goal "add comprehensive tests" \
+  --agents "testing-specialist,code-reviewer" \
+  --skills "typescript,vitest"
 ```
 
-Currently, SuperAgents requires interactive input. Scripting support planned for future version.
+**Success output** (`JsonModeOutput`):
+```json
+{
+  "success": true,
+  "mode": "existing",
+  "projectRoot": "/path/to/project",
+  "agents": ["backend-engineer", "testing-specialist"],
+  "skills": ["typescript", "nodejs"],
+  "filesWritten": ["CLAUDE.md", ".claude/agents/backend-engineer.md", "..."],
+  "warnings": []
+}
+```
+
+**Error output** (`JsonModeError`):
+```json
+{
+  "success": false,
+  "error": "No authentication available",
+  "code": "AUTH_REQUIRED"
+}
+```
+
+Error codes: `AUTH_REQUIRED`, `INVALID_SELECTION`, `GENERATION_FAILED`, `UNKNOWN_ERROR`.
+
+In JSON mode, quality gate is always `off` and the `.claude` directory is overwritten without confirmation.
 
 ### Exit Code Handling
 

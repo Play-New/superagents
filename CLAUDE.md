@@ -37,7 +37,7 @@ TypeScript CLI | Node.js >= 20 | ESM | @anthropic-ai/sdk, @clack/prompts, comman
 src/
   index.ts           CLI entry, subcommands (status, evolve, handoff, publish, use, update, cache, templates, export, import)
   pipeline.ts        Generation pipeline orchestration
-  analyzer/          Codebase detection (type, framework, deps, patterns)
+  analyzer/          Codebase detection (type, framework, deps, patterns); constants.ts for lookup tables
   blueprints/        Project blueprints (definitions, matcher, renderer)
   context/           Recommendation engine (scoring, overlap, auto-linking)
   config/            Presets (14 goal categories), export/import
@@ -55,7 +55,7 @@ src/
   types/             All type definitions (includes blueprint.ts, evolve.ts, handoff.ts, published-blueprint.ts)
   prompts/           Compressed AI prompt templates
   utils/             Auth, logger, version check
-tests/               Vitest test suites (439 tests, 27 files, 77-79% coverage)
+tests/               Vitest test suites (489 tests, 29 files, 77-79% coverage)
   helpers/           Shared mocks (clack, process, fs, fixtures)
 ```
 
@@ -93,6 +93,9 @@ Session Memory & Evolving Config — `/recap` slash command for session summarie
 ### Phase 4A (Complete)
 Handoff & Blueprint Sharing — `superagents handoff` (HANDOFF.md generation with project state, build status, roadmap progress, team config), `superagents publish` (package project as .blueprint.zip), `superagents use <source>` (install blueprint from local file or URL with --preview/--force). Enhanced ROADMAP.md parser with task description capture. Fixed install.sh for git-based installs. Full command docs for status/evolve/handoff/publish/use. 113 tests passing (12 test files).
 
+### Phase 4B (Complete)
+Blocking Quality Gates + Pipeline/JSON Mode — `--json` flag for non-interactive CI/CD use (outputs `JsonModeOutput` JSON to stdout, `JsonModeError` on failure); `--goal`, `--agents`, `--skills` flags to skip all interactive prompts; quality gate prompt added to `selectTeam` (hard: blocks stop until tests pass, soft: warns, off: default); `security-gate.sh` PreToolUse hook detects hardcoded secrets before any Write tool call; `src/analyzer/constants.ts` extracted from codebase-analyzer. 489 tests passing (29 files).
+
 ## Deep Context
 
 - `.claude/docs/architecture.md` — system overview, pipeline flow, design decisions
@@ -102,5 +105,5 @@ Handoff & Blueprint Sharing — `superagents handoff` (HANDOFF.md generation wit
 ## Checkpoint
 
 - **Branch**: v2
-- **Last completed**: Major test coverage expansion — added 191 tests across 10 new test files (Phase 0-4: foundation setup, low/medium/high/very-high complexity modules). Coverage improved from 46% to 77-79% across all metrics. Comprehensive testing of: config (presets, export/import), CLI (dry-run, prompts, progress), handoff/collector, updater, auth, pipeline, evolve/display. Created shared mock utilities (clack, process, fs, fixtures). 439 tests across 27 files, 0 type errors, 0 lint warnings.
-- **Next**: Phase 4B (registry infrastructure) or remaining utility coverage (status/display, generator/progress, logger, version-check)
+- **Last completed**: Phase 4B complete (6aa0e40) — blocking quality gates (hard/soft/off Stop hook), security gate (PreToolUse hook via security-gate.sh), JSON/pipeline mode (--json/--goal/--agents/--skills), analyzer constants extraction. 489 tests across 29 files, 0 type errors, 0 lint warnings.
+- **Next**: Phase 4C (registry infrastructure) or push coverage from 77% → 85% (status/display, generator/progress, utils/logger, utils/version-check)
